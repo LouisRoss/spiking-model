@@ -1,0 +1,9 @@
+#!/bin/bash
+echo $(pwd)
+docker container run \
+-it \
+--rm \
+--name=spiking-model \
+--mount type=bind,source="$(pwd)"/spiking-model,target=/home/spiking-model/spiking-model \
+louisross/spiking-model:1.0 \
+bash
