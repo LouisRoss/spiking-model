@@ -4,6 +4,6 @@ docker container run \
 -it \
 --rm \
 --name=spiking-model \
--v /home/louis/github/spiking-model:/home/spiking-model \
+-v "$(pwd)":/home/spiking-model \
 louisross/spiking-model:1.0 \
 bash

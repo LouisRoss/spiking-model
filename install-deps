@@ -10,14 +10,8 @@ apt-get install -y gcc-9 g++-9
 update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 20 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 apt-get install -y libtbb-dev
 
-apt-get install -y git
-
-# Install modelengine.
-git clone https://github.com/LouisRoss/modelengine.git
-mkdir /home/spiking-model/include
-cp -r modelengine/include/* /home/spiking-model/include
-
 # Install gtest/gmock.
+apt-get install -y git
 apt-get install -y cmake
 git clone https://github.com/google/googletest.git -b release-1.10.0
 cd googletest
