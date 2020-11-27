@@ -10,6 +10,8 @@ apt-get install -y gcc-9 g++-9
 update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 20 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 apt-get install -y libtbb-dev
 
+apt-get install -y libhdf5-serial-dev
+
 # Install gtest/gmock.
 apt-get install -y git
 apt-get install -y cmake

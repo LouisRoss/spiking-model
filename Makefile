@@ -36,9 +36,7 @@ install: ./include/ModelEngine.h
 .PHONY: install
 
 ./include/ModelEngine.h:
-	git clone https://github.com/LouisRoss/modelengine.git
-	mkdir ./include
-	cp -r modelengine/include/* ./include
+	./add-dependencies
 	./dockb
 
 .PHONY: clean
