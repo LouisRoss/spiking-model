@@ -3,4 +3,5 @@ include/csv-parser/*h
 include/csv-parser/*hpp
 include/csv-parser/*cpp
 include/nlohmann/*hpp
-
+spiking-model/source/obj/*o
+spiking-model/bin/*py

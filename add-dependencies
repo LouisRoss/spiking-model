@@ -16,7 +16,7 @@ rmdir HighFive
 
 git clone https://github.com/vincentlaucsb/csv-parser.git
 mkdir ./include/csv-parser
-cp -r csv-parser/include/* ./include/csv-parser
+cp -r csv-parser/single_include/* ./include/csv-parser
 rm -rf csv-parser/*
 rm -rf csv-parser/\.*
 rmdir csv-parser

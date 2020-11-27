@@ -5,8 +5,8 @@ CC=g++
 CFLAGS=-I$(IDIR) -I$(ILDIR) -I$(IH5DIR) -pthread -std=c++17
 
 ODIR=obj
-BDIR=../../bin
-LDIR=../../lib
+BDIR=../bin
+LDIR=../lib
 
 LIBS= -ldl -lhdf5_serial -ltbb
 

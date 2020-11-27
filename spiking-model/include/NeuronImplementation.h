@@ -5,6 +5,9 @@
 #include <iostream>
 #include <math.h>
 #include <chrono>
+
+#include "nlohmann/json.hpp"
+
 #include "WorkerThread.h"
 #include "WorkItem.h"
 #include "ProcessCallback.h"
@@ -17,11 +20,6 @@
 #define NOLOG
 namespace embeddedpenguins::neuron::infrastructure
 {
-    using ::embeddedpenguins::modelengine::threads::WorkerThread;
-    using ::embeddedpenguins::modelengine::threads::ProcessCallback;
-    using ::embeddedpenguins::modelengine::Log;
-    using ::embeddedpenguins::modelengine::Recorder;
-    using ::embeddedpenguins::modelengine::WorkItem;
     using std::vector;
     using std::pair;
     using std::for_each;
@@ -29,6 +27,14 @@ namespace embeddedpenguins::neuron::infrastructure
     using std::floor;
     using std::chrono::milliseconds;
     using time_point = std::chrono::high_resolution_clock::time_point;
+
+    using nlohmann::json;
+
+    using ::embeddedpenguins::modelengine::threads::WorkerThread;
+    using ::embeddedpenguins::modelengine::threads::ProcessCallback;
+    using ::embeddedpenguins::modelengine::Log;
+    using ::embeddedpenguins::modelengine::Recorder;
+    using ::embeddedpenguins::modelengine::WorkItem;
 
     // Note: the callback should be allowed to be declared something like
     // void (*callback)(const SpikingOperation&)
@@ -41,6 +47,7 @@ namespace embeddedpenguins::neuron::infrastructure
     {
         int workerId_;
         vector<NeuronNode>& model_;
+        const json& configuration_;
 
     public:
         NeuronImplementation() = delete;
@@ -48,21 +55,22 @@ namespace embeddedpenguins::neuron::infrastructure
         // Required constructor.
         // Allow the template library to pass in the model
         // for each worker thread that is created.
-        NeuronImplementation(int workerId, vector<NeuronNode>& model) :
+        NeuronImplementation(int workerId, vector<NeuronNode>& model, const json& configuration) :
             workerId_(workerId),
-            model_(model)
+            model_(model),
+            configuration_(configuration)
         {
             
         }
 
         void Initialize(Log& log, Recorder<NeuronRecord>& record, 
-            unsigned long long int ticksSinceEpoch, 
+            unsigned long long int tickNow, 
             ProcessCallback<NeuronOperation, NeuronRecord>& callback)
         {
         }
 
         void Process(Log& log, Recorder<NeuronRecord>& record, 
-            unsigned long long int ticksSinceEpoch, 
+            unsigned long long int tickNow, 
             typename vector<WorkItem<NeuronOperation>>::iterator begin, 
             typename vector<WorkItem<NeuronOperation>>::iterator end, 
             ProcessCallback<NeuronOperation, NeuronRecord>& callback)
@@ -71,11 +79,11 @@ namespace embeddedpenguins::neuron::infrastructure
 
             for (auto& work = begin; work != end; work++)
             {
-                ProcessWorkItem(log, record, ticksSinceEpoch, work->Operator, callback);
+                ProcessWorkItem(log, record, tickNow, work->Operator, callback);
             }
         }
 
-        void Finalize(Log& log, Recorder<NeuronRecord>& record, unsigned long long int ticksSinceEpoch)
+        void Finalize(Log& log, Recorder<NeuronRecord>& record, unsigned long long int tickNow)
         {
         }
 
