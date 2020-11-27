@@ -3,6 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
+                "${workspaceFolder}/include",
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/spiking-model/include/**",
                 "/usr/include/hdf5/serial/"

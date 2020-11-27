@@ -8,6 +8,12 @@ rm -rf modelengine/*
 rm -rf modelengine/\.*
 rmdir modelengine
 
+git clone https://github.com/BlueBrain/HighFive.git
+cp -r HighFive/include/* ./include
+rm -rf HighFive/*
+rm -rf HighFive/\.*
+rmdir HighFive
+
 git clone https://github.com/vincentlaucsb/csv-parser.git
 mkdir ./include/csv-parser
 cp -r csv-parser/include/* ./include/csv-parser
