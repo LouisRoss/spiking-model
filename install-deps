@@ -12,7 +12,7 @@ update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 20 --slave /usr/bi
 apt-get install -y libtbb-dev
 
 # spiking-model can read from HDF5 neural models, we need the library and include files.
-unzip -q bmtk.zip
+unzip -q ./bmtk.zip
 apt-get install -y libhdf5-serial-dev
 
 # Optional analysis software in python, must have pandas.
