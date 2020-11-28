@@ -6,7 +6,9 @@
 namespace embeddedpenguins::neuron::infrastructure
 {
     using std::make_unique;
+
     using embeddedpenguins::modelengine::sdk::IModelInitializer;
+
     using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelPersister;
     using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataInputSpikeLoader;
     
@@ -56,7 +58,7 @@ namespace embeddedpenguins::neuron::infrastructure
 #endif
     }
 
-    void ModelSonataInitializer::InjectSignal(ModelEngine<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>& modelEngine)
+    void ModelSonataInitializer::InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback)
     {
 #ifndef TESTING
         SonataInputSpikeLoader spikeLoader(*sonataRepository_);
@@ -70,15 +72,15 @@ namespace embeddedpenguins::neuron::infrastructure
             //{
             //    cout << "Initializing neuron 47 to spike at time " << (int)spikeTime << '\n';
             //}
-            modelEngine.QueueWork(NeuronOperation(spikeNode, Operation::Spike, 0), (int)spikeTime + 1000);
+            callback(NeuronOperation(spikeNode, Operation::Spike, 0), (int)spikeTime + 1000);
         }
 #else
        for (auto i = 0; i < 3000; i += 250)
        {
-            modelEngine.QueueWork(NeuronOperation(47, Operation::Spike, 0), i);
-            modelEngine.QueueWork(NeuronOperation(285, Operation::Spike, 0), i);
-            modelEngine.QueueWork(NeuronOperation(312, Operation::Spike, 0), i);
-            modelEngine.QueueWork(NeuronOperation(471, Operation::Spike, 0), i);
+            callback(NeuronOperation(47, Operation::Spike, 0), i);
+            callback(NeuronOperation(285, Operation::Spike, 0), i);
+            callback(NeuronOperation(312, Operation::Spike, 0), i);
+            callback(NeuronOperation(471, Operation::Spike, 0), i);
        }
 #endif
     }
@@ -86,11 +88,11 @@ namespace embeddedpenguins::neuron::infrastructure
 
     // the class factories
 
-    extern "C" IModelInitializer<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>* create(vector<NeuronNode>& model, json& configuration) {
+    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(vector<NeuronNode>& model, json& configuration) {
         return new ModelSonataInitializer(model, configuration);
     }
 
-    extern "C" void destroy(IModelInitializer<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>* p) {
+    extern "C" void destroy(IModelInitializer<NeuronOperation, NeuronRecord>* p) {
         delete p;
     }
 }

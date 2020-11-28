@@ -26,7 +26,7 @@ namespace embeddedpenguins::neuron::infrastructure
         model_[21].Synapses[2].Strength = 101;
     }
 
-    void ModelAnticipateInitializer::InjectSignal(ModelEngine<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>& modelEngine)
+    void ModelAnticipateInitializer::InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback)
     {
         auto s1 = 0 * 50 + 20;
         auto s2 = 0 * 50 + 21;
@@ -34,20 +34,20 @@ namespace embeddedpenguins::neuron::infrastructure
 
         for (int i = 0; i < 1600; i += 200)
         {
-            modelEngine.QueueWork(NeuronOperation(s1, Operation::Spike, 1), i);
-            modelEngine.QueueWork(NeuronOperation(s1, Operation::Spike, 1), i+20);
-            modelEngine.QueueWork(NeuronOperation(s1, Operation::Spike, 1), i+40);
-            modelEngine.QueueWork(NeuronOperation(s2, Operation::Spike, 2), i+60);
+            callback(NeuronOperation(s1, Operation::Spike, 1), i);
+            callback(NeuronOperation(s1, Operation::Spike, 1), i+20);
+            callback(NeuronOperation(s1, Operation::Spike, 1), i+40);
+            callback(NeuronOperation(s2, Operation::Spike, 2), i+60);
         }
     }
 
     // the class factories
 
-    extern "C" IModelInitializer<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>* create(vector<NeuronNode>& model, json& configuration) {
+    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(vector<NeuronNode>& model, json& configuration) {
         return new ModelAnticipateInitializer(model, configuration);
     }
 
-    extern "C" void destroy(IModelInitializer<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>* p) {
+    extern "C" void destroy(IModelInitializer<NeuronOperation, NeuronRecord>* p) {
         delete p;
     }
 }

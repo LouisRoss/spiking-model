@@ -1,16 +1,18 @@
 #include <memory>
-#include "sdk/IModelPersister.h"
-#include "nlohmann/json.hpp"
 
 #include "ModelNeuronInitializer.h"
+#include "sdk/IModelPersister.h"
 #include "persistence/sonata/SonataModelRepository.h"
 
 namespace embeddedpenguins::neuron::infrastructure
 {
     using std::unique_ptr;
     using std::vector;
-    using embeddedpenguins::modelengine::ModelEngine;
+
     using nlohmann::json;
+
+    using embeddedpenguins::modelengine::ModelEngine;
+
     using embeddedpenguins::neuron::infrastructure::ModelNeuronInitializer;
     using embeddedpenguins::neuron::infrastructure::NeuronNode;
     using embeddedpenguins::neuron::infrastructure::NeuronOperation;
@@ -32,6 +34,6 @@ namespace embeddedpenguins::neuron::infrastructure
     public:
         ModelSonataInitializer(vector<NeuronNode>& model, json& configuration);
         virtual void Initialize() override;
-        virtual void InjectSignal(ModelEngine<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>& modelEngine) override;
+        virtual void InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback) override;
     };
 }

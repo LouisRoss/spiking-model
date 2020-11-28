@@ -2,14 +2,17 @@
 
 #include <vector>
 #include <chrono>
-#include "ModelEngine.h"
+
 #include "nlohmann/json.hpp"
+
+#include "ModelEngine.h"
 #include "sdk/ModelInitializer.h"
-#include "NeuronModelHelper.h"
+
 #include "NeuronNode.h"
 #include "NeuronOperation.h"
 #include "NeuronImplementation.h"
 #include "NeuronRecord.h"
+#include "NeuronModelHelper.h"
 
 namespace embeddedpenguins::neuron::infrastructure
 {
@@ -24,7 +27,7 @@ namespace embeddedpenguins::neuron::infrastructure
     //
     // Intermediate base class for models implementing neuron dynamics.
     //
-    class ModelNeuronInitializer : public ModelInitializer<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>
+    class ModelNeuronInitializer : public ModelInitializer<NeuronNode, NeuronOperation, NeuronRecord>
     {
     private:
         NeuronModelHelper helper_;

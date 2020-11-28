@@ -2,7 +2,7 @@ IDIR=../../include
 ILDIR=../include
 IH5DIR=/usr/include/hdf5/serial/
 CC=g++
-CFLAGS=-I$(IDIR) -I$(ILDIR) -I$(IH5DIR) -pthread -std=c++17
+CFLAGS=-I$(IDIR) -I$(ILDIR) -I$(IH5DIR) -fpic -pthread -std=c++17
 
 ODIR=obj
 BDIR=../bin
@@ -29,8 +29,20 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 $(ODIR)/%.o: %.cpp $(DEPS) $(NEURONDEPS) $(SONATADEPS) $(LOCALDEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
+all: $(BDIR)/NeuronModel $(BDIR)/ModelLayerInitializer.so $(BDIR)/ModelAnticipateInitializer.so $(BDIR)/ModelSonataInitializer.so
+.PHONY: all
+
 $(BDIR)/NeuronModel: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+$(BDIR)/ModelAnticipateInitializer.so: $(ODIR)/ModelAnticipateInitializer.o
+	$(CC) -shared -o $@ $^ $(CFLAGS) $(LIBS)
+
+$(BDIR)/ModelLayerInitializer.so: $(ODIR)/ModelLayerInitializer.o
+	$(CC) -shared -o $@ $^ $(CFLAGS) $(LIBS)
+
+$(BDIR)/ModelSonataInitializer.so: $(ODIR)/ModelSonataInitializer.o
+	$(CC) -shared -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
 

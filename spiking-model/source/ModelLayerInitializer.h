@@ -1,5 +1,6 @@
+#pragma once
+
 #include "ModelNeuronInitializer.h"
-#include "nlohmann/json.hpp"
 
 namespace embeddedpenguins::neuron::infrastructure
 {
@@ -22,7 +23,7 @@ namespace embeddedpenguins::neuron::infrastructure
     public:
         ModelLayerInitializer(vector<NeuronNode>& model, json& configuration);
         virtual void Initialize() override;
-        virtual void InjectSignal(ModelEngine<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>& modelEngine) override;
+        virtual void InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback) override;
 
     private:
         void InitializeARow(int row, int destRow);

@@ -19,3 +19,4 @@ include/nlohmann/detail/conversions/*hpp
 include/nlohmann/detail/input/*hpp
 include/nlohmann/detail/output/*hpp
 include/nlohmann/thirdparty/hedley/*hpp
+spiking-model/bin/*so
