@@ -20,3 +20,5 @@ include/nlohmann/detail/input/*hpp
 include/nlohmann/detail/output/*hpp
 include/nlohmann/thirdparty/hedley/*hpp
 spiking-model/bin/*so
+spiking-model/bin/ModelEngine.log
+spiking-model/bin/__pycache__/*

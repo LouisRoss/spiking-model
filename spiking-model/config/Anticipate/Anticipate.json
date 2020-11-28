@@ -1,0 +1,19 @@
+{
+    "Model":
+    {
+        "ModelSize": 5000,
+        "ModelTicks": 1000
+    },
+    "Execution":
+    {
+        "ModelExecutable": "./NeuronModel",
+        "InitializerLocation": "./ModelAnticipateInitializer.so"
+    },
+    "PostProcessing":
+    {
+        "RecordLocation": "../record/",
+        "RecordFile": "ModelEngineRecord.csv",
+        "CleanRecordFile": "CleanRecord.csv",
+        "ImageFile": "spikes.png"
+    }
+}
