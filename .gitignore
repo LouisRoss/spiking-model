@@ -7,6 +7,9 @@ include/nlohmann/*hpp
 spiking-model/source/obj/*o
 spiking-model/bin/*py
 spiking-model/bin/NeuronModel
+spiking-model/bin/*so
+spiking-model/bin/ModelEngine.log
+spiking-model/bin/__pycache__/*
 include/highfive/*hpp
 include/highfive/*hpp.in
 include/highfive/bits/*hpp
@@ -19,6 +22,3 @@ include/nlohmann/detail/conversions/*hpp
 include/nlohmann/detail/input/*hpp
 include/nlohmann/detail/output/*hpp
 include/nlohmann/thirdparty/hedley/*hpp
-spiking-model/bin/*so
-spiking-model/bin/ModelEngine.log
-spiking-model/bin/__pycache__/*

@@ -3,6 +3,7 @@
 # Update to g++ 9.
 apt-get update
 apt-get install -y apt-utils
+apt-get install -y zip unzip
 apt-get install -y software-properties-common
 add-apt-repository -y ppa:ubuntu-toolchain-r/test
 apt-get update
@@ -11,10 +12,11 @@ update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 20 --slave /usr/bi
 apt-get install -y libtbb-dev
 
 # spiking-model can read from HDF5 neural models, we need the library and include files.
+unzip -q bmtk.zip
 apt-get install -y libhdf5-serial-dev
 
 # Optional analysis software in python, must have pandas.
-sudo apt-get install python3-pandas
+apt-get install -y python3-pandas
 
 # Install gtest/gmock.
 apt-get install -y git
@@ -25,4 +27,3 @@ cmake CMakeLists.txt
 make clean
 make
 make install
-

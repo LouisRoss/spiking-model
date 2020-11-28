@@ -1,5 +1,0 @@
-node_type_id dynamics_params model_template model_type morphology model_processing location pop_name ei
-100 472363762_fit.json ctdb:Biophys1.hoc biophysical Scnn1a_473845048_m.swc aibs_perisomatic VisL4 Scnn1a e
-101 472912177_fit.json ctdb:Biophys1.hoc biophysical Pvalb_470522102_m.swc aibs_perisomatic VisL4 PV i
-102 IntFire1_exc_1.json nrn:IntFire1 point_process NULL NULL VisL4 LIF_exc e
-103 IntFire1_inh_1.json nrn:IntFire1 point_process NULL NULL VisL4 LIF_inh i
