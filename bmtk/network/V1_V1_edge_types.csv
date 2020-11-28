@@ -1,0 +1,9 @@
+edge_type_id target_query source_query syn_weight target_sections weight_function dynamics_params model_template distance_range delay weight_sigma
+100 pop_name=='Scnn1a' ei=='e' 6.4e-05 "['basal', 'apical']" gaussianLL AMPA_ExcToExc.json exp2syn "[30.0, 150.0]" 2.0 50.0
+101 pop_name=='LIF_exc' ei=='e' 0.0019 NULL gaussianLL instanteneousExc.json exp2syn NULL 2.0 50.0
+102 ei=='i'&model_type=='biophysical' ei=='i' 0.0002 "['somatic', 'basal']" wmax GABA_InhToInh.json exp2syn "[0.0, 1e+20]" 2.0 NULL
+103 ei=='i'&model_type=='point_process' ei=='i' 0.00225 NULL wmax instanteneousInh.json exp2syn NULL 2.0 NULL
+104 ei=='e'&model_type=='biophysical' ei=='i' 0.00018 "['somatic', 'basal', 'apical']" wmax GABA_InhToExc.json exp2syn "[0.0, 50.0]" 2.0 NULL
+105 ei=='e'&model_type=='point_process' ei=='i' 0.009 NULL wmax instanteneousInh.json exp2syn NULL 2.0 NULL
+106 pop_name=='PV' ei=='e' 0.00035 "['somatic', 'basal']" wmax AMPA_ExcToInh.json exp2syn "[0.0, 1e+20]" 2.0 NULL
+107 pop_name=='LIF_inh' ei=='e' 0.0043 NULL wmax instanteneousExc.json exp2syn NULL 2.0 NULL

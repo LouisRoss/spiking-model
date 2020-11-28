@@ -1,0 +1,38 @@
+{
+  "manifest": {
+    "$BASE_DIR": "${configdir}",
+    "$NETWORK_DIR": "$BASE_DIR/network",
+    "$COMPONENTS_DIR": "$BASE_DIR/components"
+  },
+  "components": {
+    "mechanisms_dir": "$COMPONENTS_DIR/mechanisms",
+    "__pycache___dir": "$COMPONENTS_DIR/__pycache__",
+    "morphologies_dir": "$COMPONENTS_DIR/morphologies",
+    "synaptic_models_dir": "$COMPONENTS_DIR/synaptic_models",
+    "point_neuron_models_dir": "$COMPONENTS_DIR/point_neuron_models",
+    "biophysical_neuron_models_dir": "$COMPONENTS_DIR/biophysical_neuron_models",
+    "templates_dir": "$COMPONENTS_DIR/templates"
+  },
+  "networks": {
+    "nodes": [
+      {
+        "node_types_file": "$NETWORK_DIR/LGN_node_types.csv",
+        "nodes_file": "$NETWORK_DIR/LGN_nodes.h5"
+      },
+      {
+        "nodes_file": "$NETWORK_DIR/V1_nodes.h5",
+        "node_types_file": "$NETWORK_DIR/V1_node_types.csv"
+      }
+    ],
+    "edges": [
+      {
+        "edges_file": "$NETWORK_DIR/LGN_V1_edges.h5",
+        "edge_types_file": "$NETWORK_DIR/LGN_V1_edge_types.csv"
+      },
+      {
+        "edges_file": "$NETWORK_DIR/V1_V1_edges.h5",
+        "edge_types_file": "$NETWORK_DIR/V1_V1_edge_types.csv"
+      }
+    ]
+  }
+}

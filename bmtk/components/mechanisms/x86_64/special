@@ -1,0 +1,13 @@
+#!/bin/sh
+if test "x${NRNHOME}" = "x" ; then
+	NRNHOME="/opt/conda"
+fi
+if test "x${NRNBIN}" = "x" ; then
+	NRNBIN="/opt/conda/bin/"
+fi
+if test "" = "yes" ; then
+	NRNIV="${NRNBIN}nrniv.app/Contents/MacOS/nrniv"
+else
+	NRNIV="${NRNBIN}nrniv"
+fi
+"${NRNIV}" -dll "/home/shared/workspace/chapter04/sim_ch04/components/mechanisms/x86_64/.libs/libnrnmech.so" "$@"
