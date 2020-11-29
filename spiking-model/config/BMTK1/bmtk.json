@@ -2,7 +2,7 @@
     "Model":
     {
         "ModelTicks": 1000,
-        "SonataConfiguration": "../../bmtk/simulation_config.json"
+        "SonataConfiguration": "/bmtk/Chapter04/simulation_config.json"
     },
     "Execution":
     {
