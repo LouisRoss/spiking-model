@@ -1,4 +1,4 @@
-FROM    ubuntu:20.10
+FROM    louisross/modelengine-dev:1.0
 LABEL   maintainer="Louis Ross <louis.ross@gmail.com"
 
 ARG     MYDIR=/home/spiking-model
