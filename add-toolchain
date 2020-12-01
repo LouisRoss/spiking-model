@@ -1,9 +1,0 @@
-#!/bin/bash
-
-apt-get update
-apt-get install -y software-properties-common
-add-apt-repository -y ppa:ubuntu-toolchain-r/test
-apt-get install -y gcc-9 g++-9
-update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 20 --slave /usr/bin/g++ g++ /usr/bin/g++-9
-apt-get install -y libtbb-dev
-apt-get install -y libhdf5-serial-dev
