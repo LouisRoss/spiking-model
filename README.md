@@ -95,7 +95,28 @@ Here is a typical run.
 ![Running the *Layer* Sample](images/layer.gif)
 
 
-If you are quick, you can see the five leftmost neurons in the top layer firing right after the command line.  We typically see about three layers with some activity at any time, since it takes some time for activity to decay.
+If you are quick, you can see the five leftmost neurons in the top layer firing right after the command line.  We typically see about three layers with some activity at any time, since it takes some time for activity to decay within each layer.
+
+By the way, this model is configured to run 10X slower than real time, since it's pretty hard to see things happen in real time.
+
+While the run is going, all significant events, including all spikes of all neurons, are recorded in memory.  When the run stops, the in-memory recording is written to a CSV file, where it can be analyzed by Python code.  In particular, here are the spikes from the leftmost five neurons of the topmost five layers, 25 neurons in all.  The graph shows about 145 milliseconds of model time, or 1.45 seconds of real time, enough time to traverse all layers once and start at the top again.
+
+![*Layer* recordings from 25 neurons](images/LayerSpikes.png)
+
+
+Notice that the internal details of a spike's shape have been omitted in favor of better compute efficiency.  In a more biologically realistic model, spikes have a complex waveform, something like this.
+
+![By Nir.nossenson - Own work, CC BY-SA 4.0](images/Spike_HH_2.png)
+
+[By Nir.nossenson - Own work, CC BY-SA 4.0](https://commons.wikimedia.org/w/index.php?curid=48019779)
+
+This is significantly more complex, taking some time to reach a peak, followed by a quick drop to resting potential, and below, followed again by a refractory period during which it can't spike again.  This would be more realistic.  
+
+Of course, more realistic still, the model could also include a multitude of types of ion channels and neurotransmitters, possibly even properly folded proteins to implement all this!  Where to draw the line?
+
+I have chosen to draw the line here:  a spike is a spike.  It takes about 10 milliseconds, during which time the neuron is unavailble for further spiking, and after which time it is reset to reseting potential.  All other details are assumed to be a waste of compute resources.
+
+For now, that's my story and I'm sticking to it.
 
 ### The *Anticipate* Sample
 ---------------------------
