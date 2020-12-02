@@ -33,8 +33,11 @@ Also, it seems like a lot of fun!
 Contents
 --------
 
-* [License](#license)
-* [Getting Started](#getting-started)
+- [License](#license)
+- [Samples](#samples)
+    - [The *Layer* Sample](#the-layer-sample)
+    - [The *Anticipate* Sample](#the-anticipate-sample)
+    - [The *BMTK* Sample](#the-bmtk-sample)
 
 
 ## License
@@ -67,7 +70,41 @@ Copyright © 2017-2019 Vincent La http://vincela.com/
 The software contains the HighFive C++ library from the Blue Brain project which is licensed under the Boost Software License. 
 Copyright © 2015-2017 Blue Brain Project https://www.epfl.ch/research/domains/bluebrain/
 
-## Getting Started
----------------
+## Samples
+----------
+There are three samples included in this repository.  These are basically attempts at proof of correctness, meaning they are not really computing anything valuable in themselves; but they are behaving as you would expect, based on the simplified configurations.
 
+The three samples run the same modeling code; no recompilation is necessary, only configurations change.  The program is NeuronModel, and it takes a single argument, which is the configuration file name.
+
+For the first two samples, the model (a C++ `vector<NeuronNode>`) is treated as a 2-dimensional array 50 neurons wide by 25 high, and is printed continuously on the screen using a primitive console-only 'GUI'.  Thus, the results are available for viewing in real time.
+
+The third sample is much too large to be displayed in this way, so only progress messages are printed on the console.
+
+In all cases, in-memory recordings of all spikes are made, and logged to a recording file at the end of the run.  Post-processing software written in Python parses these files, extracts subsets of neurons to view, and produces time graphs of the spikes that these neurons produced during the run.
+
+### The *Layer* Sample
+---------------------
+This sample configuration treats the 25 layers in a traditional deep learning sort of way, fully connecting all 50 neurons from the top layer to the second layer down.  Again, all 50 neurons from the second layer are connected to all 50 neurons of the third layer; and so on.  The bottom layer is fully connected to the top layer, forming a loop.
+
+Spikes are injected into the leftmost five neurons of the top row.  Since all neurons in the second row receive spike signals from all five of the spiking neurons in the top row, and the synaptic strengths are set so that five at the same time are enough to go over threshold, all neurons in the second row spike.
+
+This pattern continues in this fashion.  With all neurons in the second row firing and fully connected to all neurons in the third row, the third row fires.  And so on.
+
+Here is a typical run.
+
+![Running the *Layer* Sample](images/layer.gif)
+
+
+If you are quick, you can see the five leftmost neurons in the top layer firing right after the command line.  We typically see about three layers with some activity at any time, since it takes some time for activity to decay.
+
+### The *Anticipate* Sample
+---------------------------
+
+![Running the *Anticipate* Sample](images/anticipate.gif)
+
+
+### The *BMTK* Sample
+---------------------
+
+![Running the *BMTK* Sample](images/bmtk-sample.png)
 
