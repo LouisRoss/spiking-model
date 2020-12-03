@@ -34,6 +34,7 @@ Contents
 --------
 
 - [License](#license)
+- [Geting Started](#geting-started)
 - [Samples](#samples)
     - [The *Layer* Sample](#the-layer-sample)
     - [The *Anticipate* Sample](#the-anticipate-sample)
@@ -69,6 +70,44 @@ Copyright © 2017-2019 Vincent La http://vincela.com/
 
 The software contains the HighFive C++ library from the Blue Brain project which is licensed under the Boost Software License. 
 Copyright © 2015-2017 Blue Brain Project https://www.epfl.ch/research/domains/bluebrain/
+
+## Geting Started
+-----------------
+The prerequisites to use this repository are minimal:
+1. A Linux system capable of running Docker; and
+2. Docker.
+
+If you are running Ubuntu, check out Docker installation instruction [here](https://docs.docker.com/engine/install/ubuntu/).
+
+If you are running another Linux distro, look into the Docker installation instructions at [dockerhub](https://hub.docker.com/search?type=edition&offering=community).
+
+Once you have the Docker Engine successfully installed on your system, and have given yourself permissions 
+to run Docker commands, if necessary, the steps are simple:
+1. Create a folder for the source code.  Let's say `~/source`.
+2. `> cd ~/source`
+3. `> git clone https://github.com/LouisRoss/spiking-model.git`
+4. `> cd spiking-model`
+5. `> make install`
+6. `> ./dock`
+
+At this point, you should have built the docker image and are running it on the same console. 
+It will be running as root, in a directory `/home/spiking-model`.
+
+You can build and run the samples like this.  The samples use a primitive text-only GUI,
+so don't depend on any graphics.
+
+1. `# cd spiking-engine/source`
+2. `# make`
+3. `# cd ../ui`
+4. `# make`
+3. `# cd ../bin`
+
+The samples are ready to run in the `bin` folder.  You may choose one of three pre-configured samples, as described in the following sections.
+
+1. `# python3 np.py l1`
+2. `# python3 np.py a1`
+3. `# python3 np.py bmtk1`
+
 
 ## Samples
 ----------
