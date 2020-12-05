@@ -17,6 +17,9 @@ DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 _NEURONDEPS = NeuronCommon.h NeuronConnection.h NeuronImplementation.h NeuronModelHelper.h NeuronNode.h NeuronOperation.h NeuronRecord.h NeuronSynapse.h
 NEURONDEPS = $(patsubst %,$(ILDIR)/%,$(_NEURONDEPS))
 
+_INITIALIZERDEPS = ModelNeuronInitializer.h ModelAnticipateInitializer.h ModelLayerInitializer.h ModelSonataInitializer.h
+INITIALIZERDEPS = $(patsubst %,./%,$(_INITIALIZERDEPS))
+
 _SONATADEPS = persistence/sonata/SonataCompiledModel.h persistence/sonata/SonataEdgeModel.h persistence/sonata/SonataEdgeModelLoader.h persistence/sonata/SonataInputSpikeLoader.h persistence/sonata/SonataModelLoader.h persistence/sonata/SonataModelPersister.h persistence/sonata/SonataModelRepository.h persistence/sonata/SonataNodeModel.h persistence/sonata/SonataNodeModelLoader.h
 SONATADEPS = $(patsubst %,$(ILDIR)/%,$(_SONATADEPS))
 
@@ -26,7 +29,7 @@ LOCALDEPS = $(patsubst %,./%,$(_LOCALDEPS))
 _OBJ = NeuronModel.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-$(ODIR)/%.o: %.cpp $(DEPS) $(NEURONDEPS) $(SONATADEPS) $(LOCALDEPS)
+$(ODIR)/%.o: %.cpp $(DEPS) $(NEURONDEPS) $(INITIALIZERDEPS) $(SONATADEPS) $(LOCALDEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 all: $(BDIR)/NeuronModel $(BDIR)/ModelLayerInitializer.so $(BDIR)/ModelAnticipateInitializer.so $(BDIR)/ModelSonataInitializer.so

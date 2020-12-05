@@ -131,7 +131,6 @@ namespace embeddedpenguins::neuron::infrastructure
             if (neuronNode.InRefractoryDelay)
                 return;
 
-            neuronNode.Synapses[synapseIndex].TickLastSignal = tickNow;
             switch (neuronNode.Synapses[synapseIndex].Type)
             {
                 case SynapseType::Excitatory:
@@ -153,8 +152,6 @@ namespace embeddedpenguins::neuron::infrastructure
 
             if (neuronNode.Activation > ActivationThreshold)
             {
-                neuronNode.TickLastSpike = tickNow;
-
                 record.Record(NeuronRecord(NeuronRecordType::Spike, neuronIndex, 0, neuronNode));
                 std::stringstream os;
                 os << "  ";
@@ -166,6 +163,7 @@ namespace embeddedpenguins::neuron::infrastructure
                 AdjustSynapticWeightsUpward(log, record, tickNow, neuronIndex, neuronNode);
 
                 callback(NeuronOperation(neuronIndex, Operation::Refractory), RefractoryTime);
+                neuronNode.TickLastSpike = tickNow;
                 neuronNode.Activation = ActivationThreshold;
                 neuronNode.InRefractoryDelay = true;
             }
@@ -178,6 +176,8 @@ namespace embeddedpenguins::neuron::infrastructure
                     callback(NeuronOperation(neuronIndex, Operation::Decay), 5);
                 }
             }
+
+            neuronNode.Synapses[synapseIndex].TickLastSignal = tickNow;
         }
 
         void SignalAllPostsynapticConnections(Log& log, Recorder<NeuronRecord>& record, 
@@ -211,7 +211,14 @@ namespace embeddedpenguins::neuron::infrastructure
                 {
                     // Both timers use the same monotonic increment with rollover.  The difference
                     // will always be valid, even if one has rolled over.
-                    auto ticksSinceSignal = tickNow - synapse.TickLastSignal;
+                    auto ticksSinceSignal = tickNow - (unsigned long long int)synapse.TickLastSignal;
+#ifndef NOLOG
+                    log.Logger() 
+                        << " Considering synapse index " << synapseIndex 
+                        << ", tick = " << tickNow << " - " << synapse.TickLastSignal << " = " << ticksSinceSignal
+                        << '\n';
+                    log.Logit();
+#endif
                     if (ticksSinceSignal < PostsynapticPlasticityPeriod)
                     {
                         auto newStrength = synapse.Strength * PostsynapticIncreaseFunction[ticksSinceSignal];
@@ -221,7 +228,7 @@ namespace embeddedpenguins::neuron::infrastructure
 #ifndef NOLOG
                         log.Logger() 
                             << " Synapse index " << synapseIndex 
-                            << " bumped by " << PostsynapticIncreaseFunction[ticksSinceSignal] 
+                            << ", bumped by " << PostsynapticIncreaseFunction[ticksSinceSignal] 
                             << ", resulting in strength " << synapse.Strength 
                             << '\n';
                         log.Logit();
@@ -229,8 +236,6 @@ namespace embeddedpenguins::neuron::infrastructure
                         //record.Record(NeuronRecord(neuronIndex, synapseIndex, neuronNode));
                     }
                 }
-
-                synapseIndex++;
             }
         }
 
@@ -250,7 +255,8 @@ namespace embeddedpenguins::neuron::infrastructure
 #ifndef NOLOG
                     log.Logger() 
                         << " Synapse index " << synapseIndex 
-                        << " reduced by " << PostsynapticDecreaseFunction[ticksSinceSpike] 
+                        << ", tick = " << tickNow << " - " << neuronNode.TickLastSpike << " = " << ticksSinceSpike
+                        << ", reduced by " << PostsynapticDecreaseFunction[ticksSinceSpike] 
                         << ", resulting in strength " << neuronNode.Synapses[synapseIndex].Strength 
                         << '\n';
                     log.Logit();

@@ -13,31 +13,42 @@ namespace embeddedpenguins::neuron::infrastructure
     {
         model_.resize(configuration_["Model"]["ModelSize"]);
 
+        strength_ = 101;
+        InitializeAConnection(I1, N1);
         strength_ = 51;
-        InitializeAConnection(0, 20, 10, 20);
-        InitializeAConnection(10, 21, 10, 20);
-        strength_ = 58;
-        InitializeAConnection(0, 21, 10, 21);
-        InitializeAConnection(10, 20, 10, 21);
+        InitializeAConnection(N2, N1);
 
-        model_[20].Synapses[1].IsUsed = true;
-        model_[20].Synapses[1].Strength = 101;
-        model_[21].Synapses[2].IsUsed = true;
-        model_[21].Synapses[2].Strength = 101;
+        strength_ = 101;
+        InitializeAConnection(I2, N2);
+        strength_ = 51;
+        InitializeAConnection(N1, N2);
+
+        strength_ = 101;
+        InitializeAnInput(I1);
+        InitializeAnInput(I2);
+
+        strength_ = 51;
+        auto& inh1 = GetAt(Inh1);
+        inh1.Type = NeuronType::Inhibitory;
+        InitializeAConnection(N1, Inh1);
+        InitializeAConnection(Inh1, I1);
+
+        strength_ = 51;
+        auto& inh2 = GetAt(Inh2);
+        inh2.Type = NeuronType::Inhibitory;
+        InitializeAConnection(N2, Inh2);
+        InitializeAConnection(Inh2, I2);
     }
 
     void ModelAnticipateInitializer::InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback)
     {
-        auto s1 = 0 * 50 + 20;
-        auto s2 = 0 * 50 + 21;
-        auto d1 = 10 * 50 + 20;
+        auto i1Index = GetIndex(I1);
+        auto i2Index = GetIndex(I2);
 
         for (int i = 0; i < 1600; i += 200)
         {
-            callback(NeuronOperation(s1, Operation::Spike, 1), i);
-            callback(NeuronOperation(s1, Operation::Spike, 1), i+20);
-            callback(NeuronOperation(s1, Operation::Spike, 1), i+40);
-            callback(NeuronOperation(s2, Operation::Spike, 2), i+60);
+            callback(NeuronOperation(i1Index, Operation::Spike, 0), i);
+            callback(NeuronOperation(i2Index, Operation::Spike, 0), i+7);
         }
     }
 

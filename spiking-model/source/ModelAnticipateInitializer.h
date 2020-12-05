@@ -20,6 +20,13 @@ namespace embeddedpenguins::neuron::infrastructure
     //
     class ModelAnticipateInitializer : public ModelNeuronInitializer
     {
+        const Neuron2Dim I1 = Neuron2Dim{0, 10};
+        const Neuron2Dim I2 = Neuron2Dim{0, 30};
+        const Neuron2Dim Inh1 = Neuron2Dim{0, 9};
+        const Neuron2Dim Inh2 = Neuron2Dim{0, 31};
+        const Neuron2Dim N1 = Neuron2Dim{10, 10};
+        const Neuron2Dim N2 = Neuron2Dim{10, 30};
+
     public:
         ModelAnticipateInitializer(vector<NeuronNode>& model, json& configuration);
         virtual void Initialize() override;

@@ -8,13 +8,13 @@ namespace embeddedpenguins::neuron::infrastructure
 
     constexpr int PresynapticConnectionsPerNode = 1100;
     constexpr int PostsynapticConnectionsPerNode = 1500;
-    constexpr int MaxSynapseStrength = 80;
-    constexpr int MinSynapseStrength = -80;
+    constexpr int MaxSynapseStrength = 110;
+    constexpr int MinSynapseStrength = -110;
     constexpr int ActivationThreshold = 100;
     constexpr int PostsynapticPlasticityPeriod = 20;
-    constexpr int SignalDelayTime = 4;
+    constexpr int SignalDelayTime = 1;
     constexpr int RefractoryTime = 10;
-    constexpr double DecayRate = 0.85;
+    constexpr double DecayRate = 0.80;
 
     const float PostsynapticIncreaseFunction[PostsynapticPlasticityPeriod] = 
         { 1.0, 1.125, 1.250, 1.375, 1.5, 1.625, 1.750, 1.875, 2.0, 2.125, 2.250, 2.375, 2.5, 2.0, 1.750, 1.5, 1.250, 1.0, 1.0, 1.0 };
