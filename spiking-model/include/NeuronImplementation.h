@@ -36,13 +36,6 @@ namespace embeddedpenguins::neuron::infrastructure
     using ::embeddedpenguins::modelengine::Recorder;
     using ::embeddedpenguins::modelengine::WorkItem;
 
-    // Note: the callback should be allowed to be declared something like
-    // void (*callback)(const SpikingOperation&)
-    // but I could not get that to work.  As a workaround,
-    // I have explicitly referenced the functor class used
-    // by the template library (ProcessCallback<SpikingOperation>).
-    // It would be great to get this to work so I could reduce the
-    // dependency by one class.
     class NeuronImplementation : public WorkerThread<NeuronOperation, NeuronImplementation, NeuronRecord>
     {
         int workerId_;
@@ -129,7 +122,13 @@ namespace embeddedpenguins::neuron::infrastructure
             auto& neuronNode = model_[neuronIndex];
 
             if (neuronNode.InRefractoryDelay)
+            {
+#ifndef NOLOG
+                log.Logger() << "Neuron " << neuronIndex << ", " << NeuronSynapse::ToString(neuronNode.Synapses[synapseIndex].Type) << " synapse " << synapseIndex  << " in refractory delay, skipping\n";
+                log.Logit();
+#endif
                 return;
+            }
 
             switch (neuronNode.Synapses[synapseIndex].Type)
             {
@@ -138,7 +137,7 @@ namespace embeddedpenguins::neuron::infrastructure
                     break;
                 case SynapseType::Inhibitory:
                     neuronNode.Activation -= neuronNode.Synapses[synapseIndex].Strength;
-                    if (neuronNode.Activation < 0) neuronNode.Activation = 0;
+                    if (neuronNode.Activation < -50) neuronNode.Activation = -50;
                     break;
                 case SynapseType::Attention:
                 default:
@@ -173,7 +172,7 @@ namespace embeddedpenguins::neuron::infrastructure
                 if (!neuronNode.InDecay)
                 {
                     neuronNode.InDecay = true;
-                    callback(NeuronOperation(neuronIndex, Operation::Decay), 5);
+                    callback(NeuronOperation(neuronIndex, Operation::Decay), DecayProcessRate);
                 }
             }
 
@@ -207,7 +206,7 @@ namespace embeddedpenguins::neuron::infrastructure
             for (auto synapseIndex = 0; synapseIndex < PresynapticConnectionsPerNode; synapseIndex++)
             {
                 auto& synapse = neuronNode.Synapses[synapseIndex];
-                if (synapse.IsUsed)
+                if (synapse.IsUsed && synapse.Type != SynapseType::Inhibitory)
                 {
                     // Both timers use the same monotonic increment with rollover.  The difference
                     // will always be valid, even if one has rolled over.
@@ -245,24 +244,26 @@ namespace embeddedpenguins::neuron::infrastructure
             NeuronNode& neuronNode, 
             int synapseIndex)
         {
-                // Both timers use the same monotonic increment with rollover.  The difference
-                // will always be valid, even if one has rolled over.
-                auto ticksSinceSpike = tickNow - neuronNode.TickLastSpike;
-                if (ticksSinceSpike < PostsynapticPlasticityPeriod)
-                {
-                    neuronNode.Synapses[synapseIndex].Strength *= PostsynapticDecreaseFunction[ticksSinceSpike];
+            if (neuronNode.Synapses[synapseIndex].Type == SynapseType::Inhibitory) return;
+
+            // Both timers use the same monotonic increment with rollover.  The difference
+            // will always be valid, even if one has rolled over.
+            auto ticksSinceSpike = tickNow - neuronNode.TickLastSpike;
+            if (ticksSinceSpike < PostsynapticPlasticityPeriod)
+            {
+                neuronNode.Synapses[synapseIndex].Strength *= PostsynapticDecreaseFunction[ticksSinceSpike];
 
 #ifndef NOLOG
-                    log.Logger() 
-                        << " Synapse index " << synapseIndex 
-                        << ", tick = " << tickNow << " - " << neuronNode.TickLastSpike << " = " << ticksSinceSpike
-                        << ", reduced by " << PostsynapticDecreaseFunction[ticksSinceSpike] 
-                        << ", resulting in strength " << neuronNode.Synapses[synapseIndex].Strength 
-                        << '\n';
-                    log.Logit();
+                log.Logger() 
+                    << " Synapse index " << synapseIndex 
+                    << ", tick = " << tickNow << " - " << neuronNode.TickLastSpike << " = " << ticksSinceSpike
+                    << ", reduced by " << PostsynapticDecreaseFunction[ticksSinceSpike] 
+                    << ", resulting in strength " << neuronNode.Synapses[synapseIndex].Strength 
+                    << '\n';
+                log.Logit();
 #endif
-                    //record.Record(NeuronRecord(neuronIndex, synapseIndex, neuronNode));
-                }
+                //record.Record(NeuronRecord(neuronIndex, synapseIndex, neuronNode));
+            }
         }
 
         //
@@ -276,20 +277,30 @@ namespace embeddedpenguins::neuron::infrastructure
             auto& neuronNode = model_[neuronIndex];
 
             if (neuronNode.Activation == 0 || neuronNode.InRefractoryDelay)
+            {
+#ifndef NOLOG
+                log.Logger() << "Neuron " << neuronIndex << " decayed to " << neuronNode.Activation << ", with refractory delay " << (neuronNode.InRefractoryDelay? "true" : "false") << ", skipping\n";
+                log.Logit();
+#endif
                 return;
+            }
 
             double activation = neuronNode.Activation;
             activation *= DecayRate;
-            neuronNode.Activation = (int)floor(activation);
+            if (activation >= 0.0)
+                neuronNode.Activation = (int)floor(activation);
+            else
+                neuronNode.Activation = (int)ceil(activation);
+            
 #ifndef NOLOG
             log.Logger() << "Neuron " << neuronIndex << " decayed to " << neuronNode.Activation << "\n";
             log.Logit();
 #endif
             record.Record(NeuronRecord(NeuronRecordType::Decay,  neuronIndex, -1, neuronNode));
 
-            if (neuronNode.Activation > 0)
+            if (std::abs(neuronNode.Activation) > 0)
             {
-                callback(NeuronOperation(neuronIndex, Operation::Decay), 5);
+                callback(NeuronOperation(neuronIndex, Operation::Decay), DecayProcessRate);
             }
             else
             {
@@ -308,7 +319,13 @@ namespace embeddedpenguins::neuron::infrastructure
             auto& neuronNode = model_[neuronIndex];
 
             if (!neuronNode.InRefractoryDelay)
+            {
+#ifndef NOLOG
+                log.Logger() << "Neuron " << neuronIndex << " not in refractory delay, skipping\n";
+                log.Logit();
+#endif
                 return;
+            }
 
 #ifndef NOLOG
             log.Logger() << "Neuron " << neuronIndex << " refractory delay complete\n";
