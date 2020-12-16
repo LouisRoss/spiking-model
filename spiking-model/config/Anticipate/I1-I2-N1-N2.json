@@ -1,4 +1,9 @@
 {
+    "TriggerEvent" : {
+        "EventType": 0,
+        "NeuronIndex": 10,
+        "SynapseIndex": 0
+    },
     "MonitorNeurons" : [
         [ "Inh1", 9],
         [ "I1", 10 ],

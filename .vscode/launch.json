@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}/spiking-model/bin",
+            "args": ["a1"],
+            "console": "integratedTerminal"
+        },
+        {
             "name": "g++-9 - Build and debug active file",
             "type": "cppdbg",
             "request": "launch",
