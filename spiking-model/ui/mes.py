@@ -1,5 +1,6 @@
 import sys
 import json
+from pathlib import Path
 
 class configuration:
     settings = None
@@ -58,3 +59,19 @@ class configuration:
         with open(monitor_full_path) as f:
             self.monitor = json.load(f)
         print("Using monitor path '" + monitor_full_path + "'")
+
+    def find_projectpath(self):
+        if 'PostProcessing' not in self.configuration:
+            print ('Required "PostProcessing" section not in configuration file, unable to find project path')
+            return './'
+
+        if 'CleanRecordFile' not in self.configuration['PostProcessing']:
+            print ('Required key "CleanRecordFile" not in configuration file "PostProcessing" section, unable to find project path')
+            return './'
+
+        project_name = self.control["Configuration"]
+        project_name = project_name.split('/')[-1].rstrip('.json')
+        projectpath = self.configuration['PostProcessing']['RecordLocation'].rstrip('/') + '/' + project_name + '/'
+        print('Using project name ' + project_name + ", and record path " + projectpath)
+        Path(projectpath).mkdir(parents=True, exist_ok=True)
+        return projectpath

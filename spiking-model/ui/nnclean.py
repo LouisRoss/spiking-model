@@ -60,10 +60,6 @@ class Cleaner:
             print ('Required "PostProcessing" section not in configuration file, unable to open record file')
             return
 
-        if 'RecordLocation' not in self.configuration.configuration['PostProcessing']:
-            print ('Required key "RecordLocation" not in configuration file "PostProcessing" section, unable to open record file')
-            return
-            
         if 'RecordFile' not in self.configuration.configuration['PostProcessing']:
             print ('Required key "RecordFile" not in configuration file "PostProcessing" section, unable to open record file')
             return
@@ -72,7 +68,7 @@ class Cleaner:
             print ('Required "PostProcessing" section not in monitor file, unable to clean record file')
             return
 
-        record_path = self.configuration.configuration['PostProcessing']['RecordLocation']
+        record_path = self.configuration.find_projectpath()
         record_path = record_path.rstrip('/') + '/' + self.configuration.configuration['PostProcessing']['RecordFile']
         print("Cleaning record file '" + record_path + "'")
         f = open(record_path)
