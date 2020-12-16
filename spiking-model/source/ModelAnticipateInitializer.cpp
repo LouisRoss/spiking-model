@@ -27,13 +27,13 @@ namespace embeddedpenguins::neuron::infrastructure
         InitializeAnInput(I1);
         InitializeAnInput(I2);
 
-        strength_ = 51;
+        strength_ = 101;
         auto& inh1 = GetAt(Inh1);
         inh1.Type = NeuronType::Inhibitory;
         InitializeAConnection(N1, Inh1);
         InitializeAConnection(Inh1, I1);
 
-        strength_ = 51;
+        strength_ = 101;
         auto& inh2 = GetAt(Inh2);
         inh2.Type = NeuronType::Inhibitory;
         InitializeAConnection(N2, Inh2);
@@ -45,10 +45,10 @@ namespace embeddedpenguins::neuron::infrastructure
         auto i1Index = GetIndex(I1);
         auto i2Index = GetIndex(I2);
 
-        for (int i = 0; i < 1600; i += 200)
+        for (int i = 0; i < 8000; i += 200)
         {
             callback(NeuronOperation(i1Index, Operation::Spike, 0), i);
-            callback(NeuronOperation(i2Index, Operation::Spike, 0), i+7);
+            callback(NeuronOperation(i2Index, Operation::Spike, 0), i+(SignalDelayTime*4)+2);
         }
     }
 
