@@ -199,6 +199,7 @@ The idea is to train this circuit by repeatedly sending a rapid pair of inputs, 
   <img alt="Rajesh P.N. Rao et. al." src="images/Anticipate_Figure_BC.png" width="600" />
 </p>
 
+
 During training and subsequent testing, nothing changes about the inputs.  The input event being seen by neuron I1 always occurs about 15 milliseconds before the input event seen by neuron I2.  Initially (B), this means that the neuron driven by I1, which is N1, always fires about 5 milliseconds after I1.  Similarly N2 fires about 5 milliseconds after I2.
 
 After several repititions, however, spike-timing dependent plasticity begins to work.  Because N2 always spikes a few milliseconds after N1 (actually driven by I2, not N1), N2 learns to fire earlier after N1.  After training, the N2 spike is primarily caused by N1, and I2 is not necessary.  In fact, the timing of N2 moves closer to N1, and actually begins to preceed I1 (C).
@@ -207,11 +208,19 @@ In addition, the inhibitory neuron driven by N2 acts to squelch input neuron I2,
 
 Even though only a few neurons are ever active for this sample, the initializer creates the same 25 layers of 50 neurons, just as in the previous *Layer* sample.  This allows the same display code to be used in both samples.
 
-
-
 ![Running the *Anticipate* Sample](images/anticipate.gif)
 
+This recording of the run shows 40 epochs of the four neurons N1, I1, N2, and I2.
+
 ![*Anticipate* recordings from 4 neurons](images/AnticipateSpikes.png)
+
+In this expansion, we see the first and last epoch, clearly showing that N2 has learned to anticipate I2.
+
+<p >
+  <img float="left" alt="Epoch 1" src="images/epoch1.png" width="400" />
+  <img float="left" valign="top" alt="Epoch Legend" src="images/epochlegend.png" width="100" />
+  <img float="right" alt="Epoch 39" src="images/epoch39.png" width="394" />
+</p>
 
 
 
