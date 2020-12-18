@@ -12,8 +12,15 @@ namespace embeddedpenguins::neuron::infrastructure
     void ModelLayerInitializer::Initialize()
     {
         model_.resize(configuration_["Model"]["ModelSize"]);
-        strength_ = configuration_["Model"]["InitialSynapticStrength"];
 
+        strength_ = 101;
+        InitializeAnInput(0, 1);
+        InitializeAnInput(0, 2);
+        InitializeAnInput(0, 3);
+        InitializeAnInput(0, 4);
+        InitializeAnInput(0, 5);
+
+        strength_ = configuration_["Model"]["InitialSynapticStrength"];
         for (auto row = 0; row < height_ - 1; row++)
         {
             InitializeARow(row, row + 1);
@@ -23,13 +30,13 @@ namespace embeddedpenguins::neuron::infrastructure
 
     void ModelLayerInitializer::InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback)
     {
-            for (int i = 5; i; i--)
+            for (int i = 1; i < 6; i++)
             {
-                callback(NeuronOperation(1, Operation::Spike, i), (i*3)+0);
-                callback(NeuronOperation(2, Operation::Spike, i), (i*3)-1);
-                callback(NeuronOperation(3, Operation::Spike, i), (i*3)-2);
-                callback(NeuronOperation(4, Operation::Spike, i), (i*3)-3);
-                callback(NeuronOperation(5, Operation::Spike, i), (i*3)-4);
+                callback(NeuronOperation(1, Operation::Spike, 0), (i*3)+0);
+                callback(NeuronOperation(2, Operation::Spike, 0), (i*3)-1);
+                callback(NeuronOperation(3, Operation::Spike, 0), (i*3)-2);
+                callback(NeuronOperation(4, Operation::Spike, 0), (i*3)-3);
+                callback(NeuronOperation(5, Operation::Spike, 0), (i*3)-4);
             }
     }
 

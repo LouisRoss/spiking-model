@@ -25,7 +25,7 @@ class Cleaner:
     epochoutput = []
     outputheader = []
     outputrow = []
-    trigger = {}
+    trigger = None
 
     def __init__(self, configuration):
         ''' Create the header for the cleaned CSV file, with the neuron's
@@ -104,6 +104,9 @@ class Cleaner:
         self.write_cleaned_run()
 
     def fill_output(self, row, first_tick, last_tick):
+        ''' Extend a straigt-line value from first_tick through last_tick,
+            ensuring that the cleaned output file has a value for all ticks.
+        '''
         tick = first_tick
         row[0] = tick
         self.output.append(copy.copy(row))

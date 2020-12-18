@@ -2,7 +2,9 @@ IDIR=../../include
 ILDIR=../include
 IH5DIR=/usr/include/hdf5/serial/
 CC=g++
-CFLAGS=-I$(IDIR) -I$(ILDIR) -I$(IH5DIR) -fpic -pthread -std=c++17
+CCFLAGS=-I$(IDIR) -I$(ILDIR) -I$(IH5DIR) -fpic -pthread -std=c++17
+LFLAGS=-fpic -pthread -std=c++17
+LOG=-DNOLOG
 
 ODIR=obj
 BDIR=../bin
@@ -26,28 +28,30 @@ SONATADEPS = $(patsubst %,$(ILDIR)/%,$(_SONATADEPS))
 _LOCALDEPS = KeyListener.h
 LOCALDEPS = $(patsubst %,./%,$(_LOCALDEPS))
 
-_OBJ = NeuronModel.o
-OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
-
 $(ODIR)/%.o: %.cpp $(DEPS) $(NEURONDEPS) $(INITIALIZERDEPS) $(SONATADEPS) $(LOCALDEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CCFLAGS) $(LOG)
 
 all: $(BDIR)/NeuronModel $(BDIR)/ModelLayerInitializer.so $(BDIR)/ModelAnticipateInitializer.so $(BDIR)/ModelSonataInitializer.so
 .PHONY: all
 
-$(BDIR)/NeuronModel: $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+log:
+	make LOG=""
+
+.PHONY: log
+
+$(BDIR)/NeuronModel: $(ODIR)/NeuronModel.o
+	$(CC) -o $@ $^ $(LFLAGS) $(LIBS)
 
 $(BDIR)/ModelAnticipateInitializer.so: $(ODIR)/ModelAnticipateInitializer.o
-	$(CC) -shared -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -shared -o $@ $^ $(LFLAGS) $(LIBS)
 
 $(BDIR)/ModelLayerInitializer.so: $(ODIR)/ModelLayerInitializer.o
-	$(CC) -shared -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -shared -o $@ $^ $(LFLAGS) $(LIBS)
 
 $(BDIR)/ModelSonataInitializer.so: $(ODIR)/ModelSonataInitializer.o
-	$(CC) -shared -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -shared -o $@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o *~ core $(IDIR)/*~
+	rm -f $(ODIR)/*.o

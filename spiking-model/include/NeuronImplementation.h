@@ -17,7 +17,6 @@
 #include "NeuronRecord.h"
 #include "Log.h"
 
-#define NOLOG
 namespace embeddedpenguins::neuron::infrastructure
 {
     using std::vector;
@@ -211,13 +210,6 @@ namespace embeddedpenguins::neuron::infrastructure
                     // Both timers use the same monotonic increment with rollover.  The difference
                     // will always be valid, even if one has rolled over.
                     auto ticksSinceSignal = tickNow - (unsigned long long int)synapse.TickLastSignal;
-#ifndef NOLOG
-                    log.Logger() 
-                        << " Considering synapse index " << synapseIndex 
-                        << ", tick = " << tickNow << " - " << synapse.TickLastSignal << " = " << ticksSinceSignal
-                        << '\n';
-                    log.Logit();
-#endif
                     if (ticksSinceSignal < PostsynapticPlasticityPeriod)
                     {
                         auto newStrength = synapse.Strength * PostsynapticIncreaseFunction[ticksSinceSignal];
