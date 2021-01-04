@@ -217,15 +217,15 @@ This recording of the run shows 40 epochs of the four neurons N1, I1, N2, and I2
 In this expansion, we see the first and last epoch, clearly showing that N2 has learned to anticipate I2.
 
 <p >
-  <img float="left" alt="Epoch 1" src="images/epoch1.png" width="400" />
+  <img float="left" alt="Epoch 1" src="images/epoch1.png" width="380" />
   <img float="left" valign="top" alt="Epoch Legend" src="images/epochlegend.png" width="100" />
-  <img float="right" alt="Epoch 39" src="images/epoch39.png" width="394" />
+  <img float="right" alt="Epoch 39" src="images/epoch39.png" width="374" />
 </p>
 
 
 
 ### The *BMTK* Sample
 ---------------------
-
+The initializer for this sample uses some supporting libraries to read the network information that was written by the Brain Modeling Tool Kit (BMTK) from the Allen Institute.  I generated the configuration by downloading
 ![Running the *BMTK* Sample](images/bmtk-sample.png)
 
