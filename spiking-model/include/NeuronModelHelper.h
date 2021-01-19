@@ -4,6 +4,8 @@
 #include <vector>
 #include <tuple>
 
+#include "nlohmann/json.hpp"
+
 #include "NeuronCommon.h"
 #include "NeuronNode.h"
 #include "NeuronConnection.h"
@@ -16,15 +18,28 @@ namespace embeddedpenguins::neuron::infrastructure
     using std::tuple;
     using std::make_tuple;
 
+    using nlohmann::json;
+
     class NeuronModelHelper
     {
         vector<NeuronNode>& model_;
+        json& configuration_;
 
     public:
-        NeuronModelHelper(vector<NeuronNode>& model) :
-            model_(model)
+        NeuronModelHelper(vector<NeuronNode>& model, json& configuration) :
+            model_(model),
+            configuration_(configuration)
         {
             
+        }
+
+        void InitializeModel(unsigned long int modelSize = 0)
+        {
+            auto size = modelSize;
+            if (size == 0)
+                size = (configuration_["Model"]["ModelSize"]).get<int>();
+
+            model_.resize(size);
         }
 
         void WireInput(unsigned long int sourceNodeIndex, int synapticWeight)

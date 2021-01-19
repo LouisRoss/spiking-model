@@ -36,10 +36,9 @@ namespace embeddedpenguins::neuron::infrastructure
             unsigned long long int Column {};
         };
 
-    private:
+    protected:
         NeuronModelHelper helper_;
 
-    protected:
         int width_ { 50 };
         int height_ { 25 };
         int strength_ { 21 };
@@ -47,7 +46,7 @@ namespace embeddedpenguins::neuron::infrastructure
     public:
         ModelNeuronInitializer(vector<NeuronNode>& model, json& configuration) :
             ModelInitializer(model, configuration),
-            helper_(model)
+            helper_(model, configuration)
         {
             // Get a timestamp that is about 12 hours in the past to initialize with.
             /*

@@ -66,7 +66,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
             return true;
         }
 
-        bool ReadModel(vector<NeuronNode>& model) override
+        bool ReadModel(vector<NeuronNode>& model, json& configuration) override
         {
             auto& circuitConfiguration = sonataRepository_.GetConfiguration(NETWORK_CONFIGURATION_NAME);
             auto networks = circuitConfiguration[NETWORK_NETWORKS];
@@ -89,7 +89,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
             edgeLoader.MapEdges(edges);
 
             SonataModelLoader modelLoader(nodeLoader.Populations(), edgeLoader.ModelConnections());
-            modelLoader.LoadModel(model);
+            modelLoader.LoadModel(model, configuration);
 
             return true;
         }

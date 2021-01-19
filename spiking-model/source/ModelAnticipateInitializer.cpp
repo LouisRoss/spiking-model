@@ -11,7 +11,7 @@ namespace embeddedpenguins::neuron::infrastructure
 
     void ModelAnticipateInitializer::Initialize()
     {
-        model_.resize(configuration_["Model"]["ModelSize"]);
+        helper_.InitializeModel();
 
         strength_ = 101;
         InitializeAConnection(I1, N1);

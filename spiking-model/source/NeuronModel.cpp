@@ -63,7 +63,7 @@ void PrintSynapses(vector<NeuronNode>& model)
     }
 }
 
-void TestBmtkLoading()
+void TestBmtkLoading(json configuration)
 {
     constexpr const char* configurationFilePath = "/home/louis/source/bmtk/workspace/chapter04/sim_ch04/simulation_config.json";
 
@@ -71,7 +71,7 @@ void TestBmtkLoading()
     SonataModelRepository sonataRepository(configurationFilePath);
     SonataModelPersister persister(configurationFilePath, sonataRepository);
     persister.LoadConfiguration();
-    persister.ReadModel(model);
+    persister.ReadModel(model, configuration);
 
     SonataInputSpikeLoader spikeLoader(persister.SonataRepository());
     spikeLoader.LoadSpikes(500);  // Is this number available in the LGN part of the configuration?
@@ -83,10 +83,10 @@ void TestBmtkLoading()
 //
 int main(int argc, char* argv[])
 {
-    //TestBmtkLoading();
-
     ParseArguments(argc, argv);
     ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord> modelRunner(argc, argv);
+    //TestBmtkLoading(modelRunner.Configuration());
+
     if (!modelRunner.Run())
     {
         cout << "Cannot run model, stopping\n";

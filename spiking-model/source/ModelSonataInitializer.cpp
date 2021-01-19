@@ -38,7 +38,7 @@ namespace embeddedpenguins::neuron::infrastructure
         }
 #ifndef TESTING
         persister_->LoadConfiguration();
-        persister_->ReadModel(model_);
+        persister_->ReadModel(model_, configuration_);
 #else
         model_.resize(900);
         NeuronModelHelper helper(model_);

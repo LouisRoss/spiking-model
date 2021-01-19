@@ -11,7 +11,7 @@ namespace embeddedpenguins::neuron::infrastructure
 
     void ModelLayerInitializer::Initialize()
     {
-        model_.resize(configuration_["Model"]["ModelSize"]);
+        helper_.InitializeModel();
 
         strength_ = 101;
         InitializeAnInput(0, 1);

@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "nlohmann/json.hpp"
+
 #include "NeuronModelHelper.h"
 #include "NeuronNode.h"
 
@@ -19,6 +21,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
     using std::tolower;
     using std::transform;
     using std::log10;
+    using nlohmann::json;
     using embeddedpenguins::neuron::infrastructure::NeuronModelHelper;
     using embeddedpenguins::neuron::infrastructure::NeuronType;
     using embeddedpenguins::neuron::infrastructure::NeuronNode;
@@ -40,9 +43,9 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
             
         }
 
-        void LoadModel(vector<NeuronNode>& model)
+        void LoadModel(vector<NeuronNode>& model, json& configuration)
         {
-            NeuronModelHelper helper(model);
+            NeuronModelHelper helper(model, configuration);
 
             InitializeModelNodes(model);
             WireModelConnections(helper);
