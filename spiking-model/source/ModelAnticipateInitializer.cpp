@@ -28,14 +28,12 @@ namespace embeddedpenguins::neuron::infrastructure
         InitializeAnInput(I2);
 
         strength_ = 101;
-        auto& inh1 = GetAt(Inh1);
-        inh1.Type = NeuronType::Inhibitory;
+        SetNeuronType(Inh1, NeuronType::Inhibitory);
         InitializeAConnection(N1, Inh1);
         InitializeAConnection(Inh1, I1);
 
         strength_ = 101;
-        auto& inh2 = GetAt(Inh2);
-        inh2.Type = NeuronType::Inhibitory;
+        SetNeuronType(Inh2, NeuronType::Inhibitory);
         InitializeAConnection(N2, Inh2);
         InitializeAConnection(Inh2, I2);
     }

@@ -33,6 +33,9 @@ namespace embeddedpenguins::neuron::infrastructure
             
         }
 
+        vector<NeuronNode>& Model() { return model_; }
+        const json& Configuration() const { return configuration_; }
+
         void InitializeModel(unsigned long int modelSize = 0)
         {
             auto size = modelSize;
@@ -40,6 +43,24 @@ namespace embeddedpenguins::neuron::infrastructure
                 size = (configuration_["Model"]["ModelSize"]).get<int>();
 
             model_.resize(size);
+
+            auto longTimeInThePast = numeric_limits<unsigned long long int>::max() - 1000ULL;
+            for (auto& neuron : model_)
+            {
+                neuron.TickLastSpike = longTimeInThePast;
+
+                for (auto& synapse : neuron.Synapses)
+                {
+                    synapse.Strength = 0;
+                    synapse.IsUsed = false;
+                    synapse.TickLastSignal = longTimeInThePast;
+                }
+                for (auto& connection : neuron.PostsynapticConnections)
+                {
+                    connection.PostsynapticNeuron = -1LL;
+                    connection.Synapse = -1;
+                }
+            }
         }
 
         void WireInput(unsigned long int sourceNodeIndex, int synapticWeight)
@@ -72,6 +93,16 @@ namespace embeddedpenguins::neuron::infrastructure
 
             sourceNode.RequiredPostsynapticConnections++;
             targetNode.RequiredPresynapticConnections++;
+        }
+
+        NeuronType GetNeuronType(const unsigned long long int source) const
+        {
+            return model_[source].Type;
+        }
+
+        void SetNeuronType(const unsigned long long int source, NeuronType type)
+        {
+            model_[source].Type = type;
         }
 
         tuple<unsigned long int, unsigned long int> FindRequiredSynapseCounts()
