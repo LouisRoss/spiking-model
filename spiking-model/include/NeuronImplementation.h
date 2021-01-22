@@ -14,6 +14,7 @@
 #include "Recorder.h"
 #include "NeuronOperation.h"
 #include "NeuronNode.h"
+#include "CpuModelCarrier.h"
 #include "NeuronRecord.h"
 #include "Log.h"
 
@@ -38,7 +39,7 @@ namespace embeddedpenguins::neuron::infrastructure
     class NeuronImplementation : public WorkerThread<NeuronOperation, NeuronImplementation, NeuronRecord>
     {
         int workerId_;
-        vector<NeuronNode>& model_;
+        CpuModelCarrier carrier_;
         const json& configuration_;
 
     public:
@@ -47,9 +48,9 @@ namespace embeddedpenguins::neuron::infrastructure
         // Required constructor.
         // Allow the template library to pass in the model
         // for each worker thread that is created.
-        NeuronImplementation(int workerId, vector<NeuronNode>& model, const json& configuration) :
+        NeuronImplementation(int workerId, CpuModelCarrier carrier, const json& configuration) :
             workerId_(workerId),
-            model_(model),
+            carrier_(carrier),
             configuration_(configuration)
         {
             
@@ -118,7 +119,7 @@ namespace embeddedpenguins::neuron::infrastructure
             int synapseIndex, 
             ProcessCallback<NeuronOperation, NeuronRecord>& callback)
         {
-            auto& neuronNode = model_[neuronIndex];
+            auto& neuronNode = carrier_.Model[neuronIndex];
 
             if (neuronNode.InRefractoryDelay)
             {
@@ -266,7 +267,7 @@ namespace embeddedpenguins::neuron::infrastructure
             unsigned long long int neuronIndex, 
             ProcessCallback<NeuronOperation, NeuronRecord>& callback)
         {
-            auto& neuronNode = model_[neuronIndex];
+            auto& neuronNode = carrier_.Model[neuronIndex];
 
             if (neuronNode.Activation == 0 || neuronNode.InRefractoryDelay)
             {
@@ -308,7 +309,7 @@ namespace embeddedpenguins::neuron::infrastructure
             unsigned long long int neuronIndex, 
             ProcessCallback<NeuronOperation, NeuronRecord>& callback)
         {
-            auto& neuronNode = model_[neuronIndex];
+            auto& neuronNode = carrier_.Model[neuronIndex];
 
             if (!neuronNode.InRefractoryDelay)
             {

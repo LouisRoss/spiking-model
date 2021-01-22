@@ -4,6 +4,8 @@
 #include <vector>
 #include <tuple>
 
+#include "nlohmann/json.hpp"
+
 #include "NeuronCommon.h"
 #include "NeuronNode.h"
 #include "NeuronConnection.h"
@@ -16,15 +18,50 @@ namespace embeddedpenguins::neuron::infrastructure
     using std::tuple;
     using std::make_tuple;
 
+    using nlohmann::json;
+
+    template<class ModelCarrier>
     class NeuronModelHelper
     {
         vector<NeuronNode>& model_;
+        json& configuration_;
 
     public:
-        NeuronModelHelper(vector<NeuronNode>& model) :
-            model_(model)
+        NeuronModelHelper(ModelCarrier model, json& configuration) :
+            model_(model.Model),
+            configuration_(configuration)
         {
             
+        }
+
+        vector<NeuronNode>& Model() { return model_; }
+        const json& Configuration() const { return configuration_; }
+
+        void InitializeModel(unsigned long int modelSize = 0)
+        {
+            auto size = modelSize;
+            if (size == 0)
+                size = (configuration_["Model"]["ModelSize"]).get<int>();
+
+            model_.resize(size);
+
+            auto longTimeInThePast = numeric_limits<unsigned long long int>::max() - 1000ULL;
+            for (auto& neuron : model_)
+            {
+                neuron.TickLastSpike = longTimeInThePast;
+
+                for (auto& synapse : neuron.Synapses)
+                {
+                    synapse.Strength = 0;
+                    synapse.IsUsed = false;
+                    synapse.TickLastSignal = longTimeInThePast;
+                }
+                for (auto& connection : neuron.PostsynapticConnections)
+                {
+                    connection.PostsynapticNeuron = -1LL;
+                    connection.Synapse = -1;
+                }
+            }
         }
 
         void WireInput(unsigned long int sourceNodeIndex, int synapticWeight)
@@ -57,6 +94,16 @@ namespace embeddedpenguins::neuron::infrastructure
 
             sourceNode.RequiredPostsynapticConnections++;
             targetNode.RequiredPresynapticConnections++;
+        }
+
+        NeuronType GetNeuronType(const unsigned long long int source) const
+        {
+            return model_[source].Type;
+        }
+
+        void SetNeuronType(const unsigned long long int source, NeuronType type)
+        {
+            model_[source].Type = type;
         }
 
         tuple<unsigned long int, unsigned long int> FindRequiredSynapseCounts()

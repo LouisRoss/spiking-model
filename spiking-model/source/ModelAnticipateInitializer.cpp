@@ -4,14 +4,14 @@ namespace embeddedpenguins::neuron::infrastructure
 {
     using embeddedpenguins::modelengine::sdk::IModelInitializer;
     
-    ModelAnticipateInitializer::ModelAnticipateInitializer(vector<NeuronNode>& model, json& configuration) :
-        ModelNeuronInitializer(model, configuration)
+    ModelAnticipateInitializer::ModelAnticipateInitializer(CpuModelCarrier carrier, json& configuration) :
+        ModelNeuronInitializer(carrier, configuration)
     {
     }
 
     void ModelAnticipateInitializer::Initialize()
     {
-        model_.resize(configuration_["Model"]["ModelSize"]);
+        helper_.InitializeModel();
 
         strength_ = 101;
         InitializeAConnection(I1, N1);
@@ -28,14 +28,12 @@ namespace embeddedpenguins::neuron::infrastructure
         InitializeAnInput(I2);
 
         strength_ = 101;
-        auto& inh1 = GetAt(Inh1);
-        inh1.Type = NeuronType::Inhibitory;
+        SetNeuronType(Inh1, NeuronType::Inhibitory);
         InitializeAConnection(N1, Inh1);
         InitializeAConnection(Inh1, I1);
 
         strength_ = 101;
-        auto& inh2 = GetAt(Inh2);
-        inh2.Type = NeuronType::Inhibitory;
+        SetNeuronType(Inh2, NeuronType::Inhibitory);
         InitializeAConnection(N2, Inh2);
         InitializeAConnection(Inh2, I2);
     }
@@ -54,8 +52,8 @@ namespace embeddedpenguins::neuron::infrastructure
 
     // the class factories
 
-    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(vector<NeuronNode>& model, json& configuration) {
-        return new ModelAnticipateInitializer(model, configuration);
+    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(CpuModelCarrier carrier, json& configuration) {
+        return new ModelAnticipateInitializer(carrier, configuration);
     }
 
     extern "C" void destroy(IModelInitializer<NeuronOperation, NeuronRecord>* p) {

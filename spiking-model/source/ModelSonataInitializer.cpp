@@ -12,7 +12,7 @@ namespace embeddedpenguins::neuron::infrastructure
     using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelPersister;
     using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataInputSpikeLoader;
     
-    ModelSonataInitializer::ModelSonataInitializer(vector<NeuronNode>& model, json& configuration) :
+    ModelSonataInitializer::ModelSonataInitializer(CpuModelCarrier model, json& configuration) :
         ModelNeuronInitializer(model, configuration)
     {
         cout << "ModelSonataInitializer ctor\n";
@@ -38,21 +38,20 @@ namespace embeddedpenguins::neuron::infrastructure
         }
 #ifndef TESTING
         persister_->LoadConfiguration();
-        persister_->ReadModel(model_);
+        persister_->ReadModel(helper_.Model(), configuration_);
 #else
-        model_.resize(900);
-        NeuronModelHelper helper(model_);
+        helper_.InitializeModel(900);
 
         unsigned long int sourceNodes[] = {47, 285, 312, 471};
         unsigned long int targetNodes[] = {651, 685, 702};
 
         for (auto sourceNode : sourceNodes)
         {
-            helper.WireInput(sourceNode, 101);
+            helper_.WireInput(sourceNode, 101);
 
             for (auto targetNode : targetNodes)
             {
-                helper.Wire(sourceNode, targetNode, 35);
+                helper_.Wire(sourceNode, targetNode, 35);
             }
         }
 #endif
@@ -88,7 +87,7 @@ namespace embeddedpenguins::neuron::infrastructure
 
     // the class factories
 
-    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(vector<NeuronNode>& model, json& configuration) {
+    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(CpuModelCarrier model, json& configuration) {
         return new ModelSonataInitializer(model, configuration);
     }
 

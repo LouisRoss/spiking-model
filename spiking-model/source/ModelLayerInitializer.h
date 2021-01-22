@@ -21,7 +21,7 @@ namespace embeddedpenguins::neuron::infrastructure
     class ModelLayerInitializer : public ModelNeuronInitializer
     {
     public:
-        ModelLayerInitializer(vector<NeuronNode>& model, json& configuration);
+        ModelLayerInitializer(CpuModelCarrier model, json& configuration);
         virtual void Initialize() override;
         virtual void InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback) override;
 

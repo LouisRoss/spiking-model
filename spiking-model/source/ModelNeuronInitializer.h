@@ -12,6 +12,7 @@
 #include "NeuronOperation.h"
 #include "NeuronImplementation.h"
 #include "NeuronRecord.h"
+#include "CpuModelCarrier.h"
 #include "NeuronModelHelper.h"
 
 namespace embeddedpenguins::neuron::infrastructure
@@ -27,7 +28,7 @@ namespace embeddedpenguins::neuron::infrastructure
     //
     // Intermediate base class for models implementing neuron dynamics.
     //
-    class ModelNeuronInitializer : public ModelInitializer<NeuronNode, NeuronOperation, NeuronRecord>
+    class ModelNeuronInitializer : public ModelInitializer<NeuronNode, NeuronOperation, NeuronModelHelper<CpuModelCarrier>, NeuronRecord>
     {
     public:
         struct Neuron2Dim
@@ -36,44 +37,15 @@ namespace embeddedpenguins::neuron::infrastructure
             unsigned long long int Column {};
         };
 
-    private:
-        NeuronModelHelper helper_;
-
     protected:
         int width_ { 50 };
         int height_ { 25 };
         int strength_ { 21 };
 
     public:
-        ModelNeuronInitializer(vector<NeuronNode>& model, json& configuration) :
-            ModelInitializer(model, configuration),
-            helper_(model)
+        ModelNeuronInitializer(CpuModelCarrier model, json& configuration) :
+            ModelInitializer(configuration, NeuronModelHelper<CpuModelCarrier>(model, configuration))
         {
-            // Get a timestamp that is about 12 hours in the past to initialize with.
-            /*
-            auto duration_since_epoch = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch());
-            duration_since_epoch -= duration_cast<milliseconds>(hours(12));
-            auto milliseconds_since_epoch = duration_since_epoch.count();
-            unsigned int timestamp = static_cast<unsigned int>(milliseconds_since_epoch);
-            */
-            auto longTimeInThePast = numeric_limits<unsigned long long int>::max() - 1000ULL;
-
-            for (auto& neuron : model_)
-            {
-                neuron.TickLastSpike = longTimeInThePast;
-
-                for (auto& synapse : neuron.Synapses)
-                {
-                    synapse.Strength = 0;
-                    synapse.IsUsed = false;
-                    synapse.TickLastSignal = longTimeInThePast;
-                }
-                for (auto& connection : neuron.PostsynapticConnections)
-                {
-                    connection.PostsynapticNeuron = -1LL;
-                    connection.Synapse = -1;
-                }
-            }
         }
 
     protected:
@@ -88,7 +60,7 @@ namespace embeddedpenguins::neuron::infrastructure
             InitializeAnInput(neuron.Row, neuron.Column);
         }
 
-        void InitializeAConnection(int row, int column, int destRow, int destCol)
+        void InitializeAConnection(const int row, const int column, const int destRow, const int destCol)
         {
             auto sourceIndex = GetIndex(row, column);
             auto destinationIndex = GetIndex(destRow, destCol);
@@ -100,7 +72,7 @@ namespace embeddedpenguins::neuron::infrastructure
             InitializeAConnection(source.Row, source.Column, destination.Row, destination.Column);
         }
 
-        unsigned long long int GetIndex(int row, int column)
+        unsigned long long int GetIndex(const int row, const int column) const
         {
             return row * width_ + column;
         }
@@ -110,14 +82,24 @@ namespace embeddedpenguins::neuron::infrastructure
             return GetIndex(source.Row, source.Column);
         }
 
-        NeuronNode& GetAt(int row, int column)
+        NeuronType GetNeuronType(int row, int column) const
         {
-            return model_[GetIndex(row, column)];
+            return helper_.GetNeuronType(GetIndex(row, column));
         }
 
-        NeuronNode& GetAt(const Neuron2Dim& source)
+        NeuronType GetNeuronType(const Neuron2Dim& source) const
         {
-            return GetAt(source.Row, source.Column);
+            return GetNeuronType(source.Row, source.Column);
+        }
+
+        void SetNeuronType(int row, int column, NeuronType type)
+        {
+            return helper_.SetNeuronType(GetIndex(row, column), type);
+        }
+
+        void SetNeuronType(const Neuron2Dim& source, NeuronType type)
+        {
+            return SetNeuronType(source.Row, source.Column, type);
         }
     };
 }
