@@ -32,7 +32,7 @@ namespace embeddedpenguins::neuron::infrastructure
         unique_ptr<SonataModelRepository> sonataRepository_ {nullptr};
 
     public:
-        ModelSonataInitializer(vector<NeuronNode>& model, json& configuration);
+        ModelSonataInitializer(CpuModelCarrier model, json& configuration);
         virtual void Initialize() override;
         virtual void InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback) override;
     };

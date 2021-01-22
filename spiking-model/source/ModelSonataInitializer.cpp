@@ -12,7 +12,7 @@ namespace embeddedpenguins::neuron::infrastructure
     using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelPersister;
     using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataInputSpikeLoader;
     
-    ModelSonataInitializer::ModelSonataInitializer(vector<NeuronNode>& model, json& configuration) :
+    ModelSonataInitializer::ModelSonataInitializer(CpuModelCarrier model, json& configuration) :
         ModelNeuronInitializer(model, configuration)
     {
         cout << "ModelSonataInitializer ctor\n";
@@ -87,7 +87,7 @@ namespace embeddedpenguins::neuron::infrastructure
 
     // the class factories
 
-    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(vector<NeuronNode>& model, json& configuration) {
+    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(CpuModelCarrier model, json& configuration) {
         return new ModelSonataInitializer(model, configuration);
     }
 

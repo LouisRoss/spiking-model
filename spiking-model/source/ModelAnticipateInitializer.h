@@ -28,7 +28,7 @@ namespace embeddedpenguins::neuron::infrastructure
         const Neuron2Dim N2 = Neuron2Dim{10, 30};
 
     public:
-        ModelAnticipateInitializer(vector<NeuronNode>& model, json& configuration);
+        ModelAnticipateInitializer(CpuModelCarrier model, json& configuration);
         virtual void Initialize() override;
         virtual void InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback) override;
     };

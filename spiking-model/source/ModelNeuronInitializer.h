@@ -12,6 +12,7 @@
 #include "NeuronOperation.h"
 #include "NeuronImplementation.h"
 #include "NeuronRecord.h"
+#include "CpuModelCarrier.h"
 #include "NeuronModelHelper.h"
 
 namespace embeddedpenguins::neuron::infrastructure
@@ -27,7 +28,7 @@ namespace embeddedpenguins::neuron::infrastructure
     //
     // Intermediate base class for models implementing neuron dynamics.
     //
-    class ModelNeuronInitializer : public ModelInitializer<NeuronNode, NeuronOperation, NeuronRecord>
+    class ModelNeuronInitializer : public ModelInitializer<NeuronNode, NeuronOperation, NeuronModelHelper<CpuModelCarrier>, NeuronRecord>
     {
     public:
         struct Neuron2Dim
@@ -37,16 +38,13 @@ namespace embeddedpenguins::neuron::infrastructure
         };
 
     protected:
-        NeuronModelHelper helper_;
-
         int width_ { 50 };
         int height_ { 25 };
         int strength_ { 21 };
 
     public:
-        ModelNeuronInitializer(vector<NeuronNode>& model, json& configuration) :
-            ModelInitializer(configuration),
-            helper_(model, configuration)
+        ModelNeuronInitializer(CpuModelCarrier model, json& configuration) :
+            ModelInitializer(configuration, NeuronModelHelper<CpuModelCarrier>(model, configuration))
         {
         }
 

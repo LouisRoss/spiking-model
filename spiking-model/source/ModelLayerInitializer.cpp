@@ -4,7 +4,7 @@ namespace embeddedpenguins::neuron::infrastructure
 {
     using embeddedpenguins::modelengine::sdk::IModelInitializer;
     
-    ModelLayerInitializer::ModelLayerInitializer(vector<NeuronNode>& model, json& configuration) :
+    ModelLayerInitializer::ModelLayerInitializer(CpuModelCarrier model, json& configuration) :
         ModelNeuronInitializer(model, configuration)
     {
     }
@@ -49,7 +49,7 @@ namespace embeddedpenguins::neuron::infrastructure
 
     // the class factories
 
-    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(vector<NeuronNode>& model, json& configuration) {
+    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(CpuModelCarrier model, json& configuration) {
         return new ModelLayerInitializer(model, configuration);
     }
 

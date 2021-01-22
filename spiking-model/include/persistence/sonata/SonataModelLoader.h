@@ -8,6 +8,7 @@
 
 #include "nlohmann/json.hpp"
 
+#include "CpuModelCarrier.h"
 #include "NeuronModelHelper.h"
 #include "NeuronNode.h"
 
@@ -45,7 +46,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
 
         void LoadModel(vector<NeuronNode>& model, json& configuration)
         {
-            NeuronModelHelper helper(model, configuration);
+            NeuronModelHelper<CpuModelCarrier> helper(CpuModelCarrier { .Model= model }, configuration);
 
             InitializeModelNodes(model);
             WireModelConnections(helper);
@@ -80,7 +81,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
             }
         }
 
-        void WireModelConnections(NeuronModelHelper& helper)
+        void WireModelConnections(NeuronModelHelper<CpuModelCarrier>& helper)
         {
             static int LowestBiophysicalWeight {1000};
             static int HighestBiophysicalWeight {0};

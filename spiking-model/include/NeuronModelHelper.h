@@ -20,14 +20,15 @@ namespace embeddedpenguins::neuron::infrastructure
 
     using nlohmann::json;
 
+    template<class ModelCarrier>
     class NeuronModelHelper
     {
         vector<NeuronNode>& model_;
         json& configuration_;
 
     public:
-        NeuronModelHelper(vector<NeuronNode>& model, json& configuration) :
-            model_(model),
+        NeuronModelHelper(ModelCarrier model, json& configuration) :
+            model_(model.Model),
             configuration_(configuration)
         {
             

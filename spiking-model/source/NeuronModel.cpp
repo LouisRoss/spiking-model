@@ -8,6 +8,7 @@
 #include "NeuronImplementation.h"
 #include "NeuronNode.h"
 #include "NeuronRecord.h"
+#include "CpuModelCarrier.h"
 #include "sdk/ModelRunner.h"
 #include "persistence/sonata/SonataModelRepository.h"
 #include "persistence/sonata/SonataModelPersister.h"
@@ -26,6 +27,7 @@ using embeddedpenguins::neuron::infrastructure::NeuronOperation;
 using embeddedpenguins::neuron::infrastructure::NeuronImplementation;
 using embeddedpenguins::neuron::infrastructure::NeuronNode;
 using embeddedpenguins::neuron::infrastructure::NeuronRecord;
+using embeddedpenguins::neuron::infrastructure::CpuModelCarrier;
 using embeddedpenguins::neuron::infrastructure::KeyListener;
 using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelRepository;
 using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelPersister;
@@ -43,8 +45,8 @@ using std::chrono::ceil;
 std::string cls("\033[2J\033[H");
 bool displayOn = true;
 
-char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>& modelRunner);
-void PrintNeuronScan(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>& modelRunner);
+char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner);
+void PrintNeuronScan(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner);
 char MapIntensity(int activation);
 void ParseArguments(int argc, char* argv[]);
 
@@ -84,7 +86,9 @@ void TestBmtkLoading(json configuration)
 int main(int argc, char* argv[])
 {
     ParseArguments(argc, argv);
-    ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord> modelRunner(argc, argv);
+    vector<NeuronNode> model;
+    CpuModelCarrier carrier { .Model = model };
+    ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord> modelRunner(argc, argv, carrier);
     //TestBmtkLoading(modelRunner.Configuration());
 
     if (!modelRunner.Run())
@@ -99,7 +103,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>& modelRunner)
+char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner)
 {
     char c;
     {
@@ -117,11 +121,11 @@ char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplem
     return c;
 }
 
-void PrintNeuronScan(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, NeuronRecord>& modelRunner)
+void PrintNeuronScan(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner)
 {
     cout << cls;
 
-    auto node = begin(modelRunner.GetModel());
+    auto node = begin(modelRunner.GetModel().Model);
     for (auto high = 25; high; --high)
     {
         for (auto wide = 50; wide; --wide)
