@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <map>
+#include <utility>
 #include <algorithm>
 #include <iostream>
 #include <math.h>
@@ -22,6 +24,8 @@ namespace embeddedpenguins::neuron::infrastructure
 {
     using std::vector;
     using std::pair;
+    using std::make_pair;
+    using std::multimap;
     using std::for_each;
     using std::cout;
     using std::floor;
@@ -41,6 +45,7 @@ namespace embeddedpenguins::neuron::infrastructure
         int workerId_;
         CpuModelCarrier carrier_;
         const json& configuration_;
+        multimap<int, unsigned long long int> signalToInject_;
 
     public:
         NeuronImplementation() = delete;
@@ -53,13 +58,46 @@ namespace embeddedpenguins::neuron::infrastructure
             carrier_(carrier),
             configuration_(configuration)
         {
-            
+            // Test only, remove.
+            for (int i = 1; i < 6; i++)
+            {
+                signalToInject_.insert(make_pair((i*3)+0, 1));
+                signalToInject_.insert(make_pair((i*3)-1, 2));
+                signalToInject_.insert(make_pair((i*3)-2, 3));
+                signalToInject_.insert(make_pair((i*3)-3, 4));
+                signalToInject_.insert(make_pair((i*3)-4, 5));
+            }
         }
 
-        void Initialize(Log& log, Recorder<NeuronRecord>& record, 
+        void StreamNewInputWork(Log& log, Recorder<NeuronRecord>& record, 
             unsigned long long int tickNow, 
             ProcessCallback<NeuronOperation, NeuronRecord>& callback)
         {
+            log.Logger() << "Checking for signal to inject at tick " << tickNow << " with " << signalToInject_.size() << " potential signals\n";
+            if (!signalToInject_.empty())
+            {
+                log.Logger() << "First signal is due at tick " << signalToInject_.begin()->first << "\n";
+            }
+            log.Logit();
+
+            auto done = signalToInject_.empty();
+            while (!done)
+            {
+                auto nextSignal = signalToInject_.begin();
+                if (nextSignal->first < 0 || nextSignal->first <= tickNow)
+                {
+                    log.Logger() << "Injecting signal for neuron " << nextSignal->second << "\n";
+                    log.Logit();
+
+                    callback(NeuronOperation(nextSignal->second, Operation::Spike, 0), 0);
+                    signalToInject_.extract(nextSignal);
+                    done = signalToInject_.empty();
+                }
+                else
+                {
+                    done = true;
+                }
+            };
         }
 
         void Process(Log& log, Recorder<NeuronRecord>& record, 
@@ -74,10 +112,6 @@ namespace embeddedpenguins::neuron::infrastructure
             {
                 ProcessWorkItem(log, record, tickNow, work->Operator, callback);
             }
-        }
-
-        void Finalize(Log& log, Recorder<NeuronRecord>& record, unsigned long long int tickNow)
-        {
         }
 
     private:

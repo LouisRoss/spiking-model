@@ -1,50 +1,37 @@
 #pragma once
 
-#include <vector>
-#include <chrono>
-
 #include "nlohmann/json.hpp"
 
-#include "ModelEngine.h"
 #include "sdk/ModelInitializer.h"
 
-#include "NeuronNode.h"
 #include "NeuronOperation.h"
-#include "NeuronImplementation.h"
 #include "NeuronRecord.h"
-#include "CpuModelCarrier.h"
-#include "NeuronModelHelper.h"
 
 namespace embeddedpenguins::neuron::infrastructure
 {
-    using std::chrono::high_resolution_clock;
-    using std::chrono::milliseconds;
-    using std::chrono::hours;
-    using std::chrono::duration_cast;
     using nlohmann::json;
-    using embeddedpenguins::modelengine::ModelEngine;
     using embeddedpenguins::modelengine::sdk::ModelInitializer;
+
+    struct Neuron2Dim
+    {
+        unsigned long long int Row {};
+        unsigned long long int Column {};
+    };
 
     //
     // Intermediate base class for models implementing neuron dynamics.
     //
-    class ModelNeuronInitializer : public ModelInitializer<NeuronNode, NeuronOperation, NeuronModelHelper<CpuModelCarrier>, NeuronRecord>
+    template<class MODELHELPERTYPE>
+    class ModelNeuronInitializer : public ModelInitializer<NeuronOperation, MODELHELPERTYPE, NeuronRecord>
     {
-    public:
-        struct Neuron2Dim
-        {
-            unsigned long long int Row {};
-            unsigned long long int Column {};
-        };
-
     protected:
         int width_ { 50 };
         int height_ { 25 };
         int strength_ { 21 };
 
     public:
-        ModelNeuronInitializer(CpuModelCarrier model, json& configuration) :
-            ModelInitializer(configuration, NeuronModelHelper<CpuModelCarrier>(model, configuration))
+        ModelNeuronInitializer(json& configuration, MODELHELPERTYPE helper) :
+            ModelInitializer<NeuronOperation, MODELHELPERTYPE, NeuronRecord>(configuration, helper)
         {
         }
 
@@ -52,7 +39,7 @@ namespace embeddedpenguins::neuron::infrastructure
         void InitializeAnInput(int row, int column)
         {
             auto sourceIndex = GetIndex(row, column);
-            helper_.WireInput(sourceIndex, strength_);
+            this->helper_.WireInput(sourceIndex, strength_);
         }
 
         void InitializeAnInput(const Neuron2Dim& neuron)
@@ -64,7 +51,7 @@ namespace embeddedpenguins::neuron::infrastructure
         {
             auto sourceIndex = GetIndex(row, column);
             auto destinationIndex = GetIndex(destRow, destCol);
-            helper_.Wire(sourceIndex, destinationIndex, strength_);
+            this->helper_.Wire(sourceIndex, destinationIndex, strength_);
         }
 
         void InitializeAConnection(const Neuron2Dim& source, const Neuron2Dim& destination)
@@ -82,24 +69,24 @@ namespace embeddedpenguins::neuron::infrastructure
             return GetIndex(source.Row, source.Column);
         }
 
-        NeuronType GetNeuronType(int row, int column) const
+        void SetExcitatoryNeuronType(const unsigned long long int source)
         {
-            return helper_.GetNeuronType(GetIndex(row, column));
+            this->helper_.SetExcitatoryNeuronType(source);
         }
 
-        NeuronType GetNeuronType(const Neuron2Dim& source) const
+        void SetExcitatoryNeuronType(const Neuron2Dim& source)
         {
-            return GetNeuronType(source.Row, source.Column);
+            SetExcitatoryNeuronType(GetIndex(source.Row, source.Column));
         }
 
-        void SetNeuronType(int row, int column, NeuronType type)
+        void SetInhibitoryNeuronType(const unsigned long long int source)
         {
-            return helper_.SetNeuronType(GetIndex(row, column), type);
+            this->helper_.SetInhibitoryNeuronType(source);
         }
 
-        void SetNeuronType(const Neuron2Dim& source, NeuronType type)
+        void SetInhibitoryNeuronType(const Neuron2Dim& source)
         {
-            return SetNeuronType(source.Row, source.Column, type);
+            SetInhibitoryNeuronType(GetIndex(source.Row, source.Column));
         }
     };
 }

@@ -27,8 +27,8 @@ namespace embeddedpenguins::neuron::infrastructure
         json& configuration_;
 
     public:
-        NeuronModelHelper(ModelCarrier model, json& configuration) :
-            model_(model.Model),
+        NeuronModelHelper(ModelCarrier carrier, json& configuration) :
+            model_(carrier.Model),
             configuration_(configuration)
         {
             
@@ -101,11 +101,16 @@ namespace embeddedpenguins::neuron::infrastructure
             return model_[source].Type;
         }
 
-        void SetNeuronType(const unsigned long long int source, NeuronType type)
+        void SetExcitatoryNeuronType(const unsigned long long int source)
         {
-            model_[source].Type = type;
+            model_[source].Type = NeuronType::Excitatory;
         }
 
+        void SetInhibitoryNeuronType(const unsigned long long int source)
+        {
+            model_[source].Type = NeuronType::Inhibitory;
+        }
+        
         tuple<unsigned long int, unsigned long int> FindRequiredSynapseCounts()
         {
             unsigned long int postsynapticConnections {};

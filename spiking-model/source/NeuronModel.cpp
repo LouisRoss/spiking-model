@@ -23,6 +23,7 @@ using namespace nlohmann;
 
 using embeddedpenguins::modelengine::ModelEngine;
 using embeddedpenguins::modelengine::sdk::ModelRunner;
+using embeddedpenguins::neuron::infrastructure::Operation;
 using embeddedpenguins::neuron::infrastructure::NeuronOperation;
 using embeddedpenguins::neuron::infrastructure::NeuronImplementation;
 using embeddedpenguins::neuron::infrastructure::NeuronNode;
@@ -96,6 +97,16 @@ int main(int argc, char* argv[])
         cout << "Cannot run model, stopping\n";
         return 1;
     }
+
+    vector<tuple<NeuronOperation, int>> signals 
+    {
+        { NeuronOperation(1, Operation::Spike, 0), (10*3)+0 },
+        { NeuronOperation(2, Operation::Spike, 0), (10*3)-1 },
+        { NeuronOperation(3, Operation::Spike, 0), (10*3)-2 },
+        { NeuronOperation(4, Operation::Spike, 0), (10*3)-3 },
+        { NeuronOperation(5, Operation::Spike, 0), (10*3)-4 }
+    };
+    //modelRunner.InjectSignal(signals);
 
     PrintAndListenForQuit(modelRunner);
 
