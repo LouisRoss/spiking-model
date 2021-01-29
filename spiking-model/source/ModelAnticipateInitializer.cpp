@@ -8,7 +8,7 @@ namespace embeddedpenguins::neuron::infrastructure
     
     // the class factories
 
-    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(CpuModelCarrier carrier, json& configuration) {
+    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(CpuModelCarrier& carrier, json& configuration) {
         return new ModelAnticipateInitializer<NeuronModelHelper<CpuModelCarrier>>(configuration, NeuronModelHelper<CpuModelCarrier>(carrier, configuration));
     }
 

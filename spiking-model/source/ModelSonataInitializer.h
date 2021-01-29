@@ -6,6 +6,7 @@
 #include "persistence/sonata/SonataModelRepository.h"
 #include "persistence/sonata/SonataModelPersister.h"
 #include "persistence/sonata/SonataInputSpikeLoader.h"
+#include "CpuModelCarrier.h"
 
 //#define TESTING
 namespace embeddedpenguins::neuron::infrastructure
@@ -19,6 +20,7 @@ namespace embeddedpenguins::neuron::infrastructure
     using embeddedpenguins::neuron::infrastructure::ModelNeuronInitializer;
     using embeddedpenguins::neuron::infrastructure::NeuronOperation;
     using embeddedpenguins::neuron::infrastructure::NeuronRecord;
+    using embeddedpenguins::neuron::infrastructure::CpuModelCarrier;
     using embeddedpenguins::modelengine::threads::ProcessCallback;
     using embeddedpenguins::neuron::infrastructure::persistence::IModelPersister;
     using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelRepository;
@@ -33,7 +35,7 @@ namespace embeddedpenguins::neuron::infrastructure
     class ModelSonataInitializer : public ModelNeuronInitializer<MODELHELPERTYPE>
     {
         bool valid_ { false };
-        unique_ptr<IModelPersister<NeuronNode>> persister_ {nullptr};
+        unique_ptr<IModelPersister<CpuModelCarrier>> persister_ {nullptr};
         unique_ptr<SonataModelRepository> sonataRepository_ {nullptr};
 
     public:
@@ -63,7 +65,7 @@ namespace embeddedpenguins::neuron::infrastructure
             }
 #ifndef TESTING
             persister_->LoadConfiguration();
-            persister_->ReadModel(this->helper_.Model(), this->configuration_);
+            persister_->ReadModel(this->helper_.Carrier(), this->configuration_);
 #else
             helper_.InitializeModel(900);
 
@@ -81,7 +83,7 @@ namespace embeddedpenguins::neuron::infrastructure
             }
 #endif
         }
-
+/*
         virtual void InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback) override
         {
 #ifndef TESTING
@@ -108,5 +110,6 @@ namespace embeddedpenguins::neuron::infrastructure
             }
 #endif
         }
+*/
     };
 }

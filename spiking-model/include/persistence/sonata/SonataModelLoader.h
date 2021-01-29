@@ -26,6 +26,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
     using embeddedpenguins::neuron::infrastructure::NeuronModelHelper;
     using embeddedpenguins::neuron::infrastructure::NeuronType;
     using embeddedpenguins::neuron::infrastructure::NeuronNode;
+    using embeddedpenguins::neuron::infrastructure::CpuModelCarrier;
 
     class SonataModelLoader
     {
@@ -44,21 +45,21 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
             
         }
 
-        void LoadModel(vector<NeuronNode>& model, json& configuration)
+        void LoadModel(CpuModelCarrier& carrier, json& configuration)
         {
-            NeuronModelHelper<CpuModelCarrier> helper(CpuModelCarrier { .Model= model }, configuration);
+            NeuronModelHelper<CpuModelCarrier> helper(carrier, configuration);
 
-            InitializeModelNodes(model);
+            InitializeModelNodes(carrier);
             WireModelConnections(helper);
 
             auto [postsynapticConnections, presynapticConnections] = helper.FindRequiredSynapseCounts();
         }
 
     private:
-        void InitializeModelNodes(vector<NeuronNode>& model)
+        void InitializeModelNodes(CpuModelCarrier& carrier)
         {
             auto nodeCount = populations_.NodeCount();
-            model.resize(nodeCount);
+            carrier.Model.resize(nodeCount);
             cout << "Setting model size to " << nodeCount << " nodes\n";
 
             auto modelIndex { 0UL };
@@ -68,7 +69,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
                 {
                     for (auto i = 0; i < nodeGroup.NodeCount(); i++)
                     {
-                        model[modelIndex].Type = nodeGroup.Action() == NodeAction::Excitatory ? NeuronType::Excitatory : NeuronType::Inhibitory;
+                        carrier.Model[modelIndex].Type = nodeGroup.Action() == NodeAction::Excitatory ? NeuronType::Excitatory : NeuronType::Inhibitory;
                         modelIndex++;
                     }
                 }

@@ -1,8 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <map>
-#include <utility>
 #include <algorithm>
 #include <iostream>
 #include <math.h>
@@ -23,9 +21,6 @@
 namespace embeddedpenguins::neuron::infrastructure
 {
     using std::vector;
-    using std::pair;
-    using std::make_pair;
-    using std::multimap;
     using std::for_each;
     using std::cout;
     using std::floor;
@@ -43,9 +38,8 @@ namespace embeddedpenguins::neuron::infrastructure
     class NeuronImplementation : public WorkerThread<NeuronOperation, NeuronImplementation, NeuronRecord>
     {
         int workerId_;
-        CpuModelCarrier carrier_;
+        CpuModelCarrier& carrier_;
         const json& configuration_;
-        multimap<int, unsigned long long int> signalToInject_;
 
     public:
         NeuronImplementation() = delete;
@@ -53,51 +47,30 @@ namespace embeddedpenguins::neuron::infrastructure
         // Required constructor.
         // Allow the template library to pass in the model
         // for each worker thread that is created.
-        NeuronImplementation(int workerId, CpuModelCarrier carrier, const json& configuration) :
+        NeuronImplementation(int workerId, CpuModelCarrier& carrier, const json& configuration) :
             workerId_(workerId),
             carrier_(carrier),
             configuration_(configuration)
         {
-            // Test only, remove.
-            for (int i = 1; i < 6; i++)
-            {
-                signalToInject_.insert(make_pair((i*3)+0, 1));
-                signalToInject_.insert(make_pair((i*3)-1, 2));
-                signalToInject_.insert(make_pair((i*3)-2, 3));
-                signalToInject_.insert(make_pair((i*3)-3, 4));
-                signalToInject_.insert(make_pair((i*3)-4, 5));
-            }
         }
 
         void StreamNewInputWork(Log& log, Recorder<NeuronRecord>& record, 
             unsigned long long int tickNow, 
             ProcessCallback<NeuronOperation, NeuronRecord>& callback)
         {
-            log.Logger() << "Checking for signal to inject at tick " << tickNow << " with " << signalToInject_.size() << " potential signals\n";
-            if (!signalToInject_.empty())
+            auto& streamedInput = carrier_.sensorInput_.StreamInput(tickNow);
+            if (!streamedInput.empty())
             {
-                log.Logger() << "First signal is due at tick " << signalToInject_.begin()->first << "\n";
+                log.Logger() << "Checking for signal to inject at tick " << tickNow << " with " << streamedInput.size() << " signals\n";
+                log.Logit();
             }
-            log.Logit();
 
-            auto done = signalToInject_.empty();
-            while (!done)
+            for (auto nodeIndex : streamedInput)
             {
-                auto nextSignal = signalToInject_.begin();
-                if (nextSignal->first < 0 || nextSignal->first <= tickNow)
-                {
-                    log.Logger() << "Injecting signal for neuron " << nextSignal->second << "\n";
-                    log.Logit();
-
-                    callback(NeuronOperation(nextSignal->second, Operation::Spike, 0), 0);
-                    signalToInject_.extract(nextSignal);
-                    done = signalToInject_.empty();
-                }
-                else
-                {
-                    done = true;
-                }
-            };
+                log.Logger() << "Injecting signal for neuron " << nodeIndex << "\n";
+                log.Logit();
+                callback(NeuronOperation(nodeIndex, Operation::Spike, 0), 0);
+            }
         }
 
         void Process(Log& log, Recorder<NeuronRecord>& record, 

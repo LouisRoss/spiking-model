@@ -46,8 +46,8 @@ using std::chrono::ceil;
 std::string cls("\033[2J\033[H");
 bool displayOn = true;
 
-char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner);
-void PrintNeuronScan(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner);
+char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier);
+void PrintNeuronScan(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier);
 char MapIntensity(int activation);
 void ParseArguments(int argc, char* argv[]);
 
@@ -66,15 +66,16 @@ void PrintSynapses(vector<NeuronNode>& model)
     }
 }
 
-void TestBmtkLoading(json configuration)
+void TestBmtkLoading(json& configuration)
 {
     constexpr const char* configurationFilePath = "/home/louis/source/bmtk/workspace/chapter04/sim_ch04/simulation_config.json";
 
     vector<NeuronNode> model {};
+    CpuModelCarrier carrier(model, "./SensorInputFile.so", configuration);
     SonataModelRepository sonataRepository(configurationFilePath);
     SonataModelPersister persister(configurationFilePath, sonataRepository);
     persister.LoadConfiguration();
-    persister.ReadModel(model, configuration);
+    persister.ReadModel(carrier, configuration);
 
     SonataInputSpikeLoader spikeLoader(persister.SonataRepository());
     spikeLoader.LoadSpikes(500);  // Is this number available in the LGN part of the configuration?
@@ -88,33 +89,23 @@ int main(int argc, char* argv[])
 {
     ParseArguments(argc, argv);
     vector<NeuronNode> model;
-    CpuModelCarrier carrier { .Model = model };
-    ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord> modelRunner(argc, argv, carrier);
+    ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord> modelRunner(argc, argv);
     //TestBmtkLoading(modelRunner.Configuration());
 
-    if (!modelRunner.Run())
+    CpuModelCarrier carrier(model, "./SensorInputFile.so", modelRunner.Configuration());
+    if (!modelRunner.Run(carrier))
     {
         cout << "Cannot run model, stopping\n";
         return 1;
     }
 
-    vector<tuple<NeuronOperation, int>> signals 
-    {
-        { NeuronOperation(1, Operation::Spike, 0), (10*3)+0 },
-        { NeuronOperation(2, Operation::Spike, 0), (10*3)-1 },
-        { NeuronOperation(3, Operation::Spike, 0), (10*3)-2 },
-        { NeuronOperation(4, Operation::Spike, 0), (10*3)-3 },
-        { NeuronOperation(5, Operation::Spike, 0), (10*3)-4 }
-    };
-    //modelRunner.InjectSignal(signals);
-
-    PrintAndListenForQuit(modelRunner);
+    PrintAndListenForQuit(modelRunner, carrier);
 
     modelRunner.WaitForQuit();
     return 0;
 }
 
-char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner)
+char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier)
 {
     char c;
     {
@@ -123,7 +114,7 @@ char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplem
         bool quit {false};
         while (!quit)
         {
-            if (displayOn) PrintNeuronScan(modelRunner);
+            if (displayOn) PrintNeuronScan(modelRunner, carrier);
             quit = listener.Listen(50'000, c);
         }
     }
@@ -132,11 +123,11 @@ char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplem
     return c;
 }
 
-void PrintNeuronScan(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner)
+void PrintNeuronScan(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier)
 {
     cout << cls;
 
-    auto node = begin(modelRunner.GetModel().Model);
+    auto node = begin(carrier.Model);
     for (auto high = 25; high; --high)
     {
         for (auto wide = 50; wide; --wide)

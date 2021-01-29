@@ -59,17 +59,5 @@ namespace embeddedpenguins::neuron::infrastructure
             this->InitializeAConnection(N2, Inh2);
             this->InitializeAConnection(Inh2, I2);
         }
-
-        virtual void InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback) override
-        {
-            auto i1Index = this->GetIndex(I1);
-            auto i2Index = this->GetIndex(I2);
-
-            for (int i = 0; i < 8000; i += 200)
-            {
-                callback(NeuronOperation(i1Index, Operation::Spike, 0), i);
-                callback(NeuronOperation(i2Index, Operation::Spike, 0), i+(SignalDelayTime*4)+2);
-            }
-        }
     };
 }

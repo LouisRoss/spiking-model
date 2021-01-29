@@ -23,18 +23,19 @@ namespace embeddedpenguins::neuron::infrastructure
     template<class ModelCarrier>
     class NeuronModelHelper
     {
-        vector<NeuronNode>& model_;
+        ModelCarrier& carrier_;
         json& configuration_;
 
     public:
-        NeuronModelHelper(ModelCarrier carrier, json& configuration) :
-            model_(carrier.Model),
+        NeuronModelHelper(ModelCarrier& carrier, json& configuration) :
+            carrier_(carrier),
             configuration_(configuration)
         {
             
         }
 
-        vector<NeuronNode>& Model() { return model_; }
+        vector<NeuronNode>& Model() { return carrier_.Model; }
+        ModelCarrier& Carrier() { return carrier_; }
         const json& Configuration() const { return configuration_; }
 
         void InitializeModel(unsigned long int modelSize = 0)
@@ -43,10 +44,10 @@ namespace embeddedpenguins::neuron::infrastructure
             if (size == 0)
                 size = (configuration_["Model"]["ModelSize"]).get<int>();
 
-            model_.resize(size);
+            carrier_.Model.resize(size);
 
             auto longTimeInThePast = numeric_limits<unsigned long long int>::max() - 1000ULL;
-            for (auto& neuron : model_)
+            for (auto& neuron : carrier_.Model)
             {
                 neuron.TickLastSpike = longTimeInThePast;
 
@@ -66,7 +67,7 @@ namespace embeddedpenguins::neuron::infrastructure
 
         void WireInput(unsigned long int sourceNodeIndex, int synapticWeight)
         {
-            auto& sourceNode = model_[sourceNodeIndex];
+            auto& sourceNode = carrier_.Model[sourceNodeIndex];
 
             sourceNode.Synapses[0].IsUsed = true;
             sourceNode.Synapses[0].Strength = synapticWeight;
@@ -77,9 +78,9 @@ namespace embeddedpenguins::neuron::infrastructure
 
         void Wire(unsigned long long int sourceNodeIndex, unsigned long long int targetNodeIndex, int synapticWeight)
         {
-            auto& sourceNode = model_[sourceNodeIndex];
+            auto& sourceNode = carrier_.Model[sourceNodeIndex];
             auto sourceSynapseIndex = FindNextUnusedSourceConnection(sourceNode);
-            auto& targetNode = model_[targetNodeIndex];
+            auto& targetNode = carrier_.Model[targetNodeIndex];
             auto targetSynapseIndex = FindNextUnusedTargetSynapse(targetNode);
 
             if (sourceSynapseIndex != -1 && targetSynapseIndex != -1)
@@ -98,17 +99,17 @@ namespace embeddedpenguins::neuron::infrastructure
 
         NeuronType GetNeuronType(const unsigned long long int source) const
         {
-            return model_[source].Type;
+            return carrier_.Model[source].Type;
         }
 
         void SetExcitatoryNeuronType(const unsigned long long int source)
         {
-            model_[source].Type = NeuronType::Excitatory;
+            carrier_.Model[source].Type = NeuronType::Excitatory;
         }
 
         void SetInhibitoryNeuronType(const unsigned long long int source)
         {
-            model_[source].Type = NeuronType::Inhibitory;
+            carrier_.Model[source].Type = NeuronType::Inhibitory;
         }
         
         tuple<unsigned long int, unsigned long int> FindRequiredSynapseCounts()
@@ -116,7 +117,7 @@ namespace embeddedpenguins::neuron::infrastructure
             unsigned long int postsynapticConnections {};
             unsigned long int presynapticConnections {};
 
-            for (const auto& node : model_)
+            for (const auto& node : carrier_.Model)
             {
                 postsynapticConnections = std::max(postsynapticConnections, node.RequiredPostsynapticConnections);
                 presynapticConnections = std::max(presynapticConnections, node.RequiredPresynapticConnections);

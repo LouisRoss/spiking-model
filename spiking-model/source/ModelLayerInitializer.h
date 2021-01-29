@@ -43,20 +43,6 @@ namespace embeddedpenguins::neuron::infrastructure
             InitializeARow(this->height_ - 1, 0);
         }
 
-        virtual void InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback) override
-        {
-            /*
-            for (int i = 1; i < 6; i++)
-            {
-                callback(NeuronOperation(1, Operation::Spike, 0), (i*3)+0);
-                callback(NeuronOperation(2, Operation::Spike, 0), (i*3)-1);
-                callback(NeuronOperation(3, Operation::Spike, 0), (i*3)-2);
-                callback(NeuronOperation(4, Operation::Spike, 0), (i*3)-3);
-                callback(NeuronOperation(5, Operation::Spike, 0), (i*3)-4);
-            }
-            */
-        }
-
     private:
         void InitializeARow(int row, int destRow)
         {
