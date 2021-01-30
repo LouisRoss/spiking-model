@@ -3,16 +3,19 @@
     {
         "ModelSize": 5000,
         "ModelTicks": 10000,
-        "InitialSynapticStrength": 40
+        "InitialSynapticStrength": 40,
+        "InputStreamFileGenerator": "./nngenlayer.py"
     },
     "Execution":
     {
         "ModelExecutable": "./NeuronModel",
-        "InitializerLocation": "./ModelLayerInitializer.so"
+        "InitializerLocation": "./ModelLayerInitializer.so",
+        "InputStreamer": "./SensorInputFile.so"
     },
     "PostProcessing":
     {
         "RecordLocation": "../record/",
+        "SensorInputFile": "SensorInput.json",
         "RecordFile": "ModelEngineRecord.csv",
         "CleanRecordFile": "CleanRecord.csv",
         "ImageFile": "spikes.png"

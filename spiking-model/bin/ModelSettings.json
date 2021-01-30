@@ -1,3 +1,4 @@
 {
-    "ConfigFilePath": "../config"
+    "ConfigFilePath": "../config",
+    "PythonInterpreter": "python3"
 }
