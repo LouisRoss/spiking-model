@@ -1,6 +1,8 @@
 #include <memory>
 #include <string>
 
+#include "ModelEngineCommon.h"
+
 #include "ModelNeuronInitializer.h"
 #include "sdk/IModelPersister.h"
 #include "persistence/sonata/SonataModelRepository.h"
@@ -17,6 +19,7 @@ namespace embeddedpenguins::neuron::infrastructure
 
     using nlohmann::json;
 
+    using embeddedpenguins::modelengine::ConfigurationUtilities;
     using embeddedpenguins::neuron::infrastructure::ModelNeuronInitializer;
     using embeddedpenguins::neuron::infrastructure::NeuronOperation;
     using embeddedpenguins::neuron::infrastructure::NeuronRecord;
@@ -39,11 +42,11 @@ namespace embeddedpenguins::neuron::infrastructure
         unique_ptr<SonataModelRepository> sonataRepository_ {nullptr};
 
     public:
-        ModelSonataInitializer(json& configuration, MODELHELPERTYPE helper)  :
+        ModelSonataInitializer(ConfigurationUtilities& configuration, MODELHELPERTYPE helper)  :
             ModelNeuronInitializer<MODELHELPERTYPE>(configuration, helper)
         {
             cout << "ModelSonataInitializer ctor\n";
-            json& sonataConfigurationJson = this->configuration_["Model"]["SonataConfiguration"];
+            const json& sonataConfigurationJson = this->configuration_.Configuration()["Model"]["SonataConfiguration"];
             if (!sonataConfigurationJson.is_string())
             {
                 cout << "ModelSonataInitializer unable to find sonata configuration file path\n";

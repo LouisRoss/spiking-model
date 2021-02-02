@@ -4,16 +4,11 @@
 
 namespace embeddedpenguins::neuron::infrastructure
 {
-    //using std::make_unique;
-
     using embeddedpenguins::modelengine::sdk::IModelInitializer;
 
-    //using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelPersister;
-    //using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataInputSpikeLoader;
-    
     // the class factories
 
-    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(CpuModelCarrier carrier, json& configuration) {
+    extern "C" IModelInitializer<NeuronOperation, NeuronRecord>* create(CpuModelCarrier carrier, ConfigurationUtilities& configuration) {
         return new ModelSonataInitializer<NeuronModelHelper<CpuModelCarrier>>(configuration, NeuronModelHelper<CpuModelCarrier>(carrier, configuration));
     }
 

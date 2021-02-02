@@ -3,19 +3,22 @@
 #include <string>
 #include <chrono>
 #include <stdio.h>
+
+#include "nlohmann/json.hpp"
+#include "highfive/H5Easy.hpp"
+
 #include "ModelEngine.h"
 #include "NeuronOperation.h"
 #include "NeuronImplementation.h"
 #include "NeuronNode.h"
 #include "NeuronRecord.h"
 #include "CpuModelCarrier.h"
+#include "ModelEngineCommon.h"
 #include "sdk/ModelRunner.h"
 #include "persistence/sonata/SonataModelRepository.h"
 #include "persistence/sonata/SonataModelPersister.h"
 #include "persistence/sonata/SonataInputSpikeLoader.h"
 #include "KeyListener.h"
-#include "nlohmann/json.hpp"
-#include "highfive/H5Easy.hpp"
 
 using namespace std;
 using namespace std::chrono;
@@ -30,6 +33,7 @@ using embeddedpenguins::neuron::infrastructure::NeuronNode;
 using embeddedpenguins::neuron::infrastructure::NeuronRecord;
 using embeddedpenguins::neuron::infrastructure::CpuModelCarrier;
 using embeddedpenguins::neuron::infrastructure::KeyListener;
+using embeddedpenguins::neuron::infrastructure::ConfigurationUtilities;
 using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelRepository;
 using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelPersister;
 using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataInputSpikeLoader;
@@ -66,12 +70,12 @@ void PrintSynapses(vector<NeuronNode>& model)
     }
 }
 
-void TestBmtkLoading(json& configuration)
+void TestBmtkLoading(ConfigurationUtilities& configuration)
 {
     constexpr const char* configurationFilePath = "/home/louis/source/bmtk/workspace/chapter04/sim_ch04/simulation_config.json";
 
     vector<NeuronNode> model {};
-    CpuModelCarrier carrier(model, "./SensorInputFile.so", configuration);
+    CpuModelCarrier carrier(model, "./SensorInputFile.so");
     SonataModelRepository sonataRepository(configurationFilePath);
     SonataModelPersister persister(configurationFilePath, sonataRepository);
     persister.LoadConfiguration();
@@ -90,9 +94,22 @@ int main(int argc, char* argv[])
     ParseArguments(argc, argv);
     vector<NeuronNode> model;
     ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord> modelRunner(argc, argv);
-    //TestBmtkLoading(modelRunner.Configuration());
+    //TestBmtkLoading(modelRunner.ConfigurationCarrier());
 
-    CpuModelCarrier carrier(model, "./SensorInputFile.so", modelRunner.Configuration());
+    cout << "Discovering sensor input library\n";
+    string sensorInputLibraryPath {};
+    auto& executionSection = modelRunner.Configuration()["Execution"];
+    if (!executionSection.is_null() && executionSection.contains("InputStreamer"))
+    {
+        cout << "Found 'Execution' section in configuration\n";
+        auto& sensorInputLibrary = executionSection["InputStreamer"];
+        cout << "Found 'InputStreamer' section in section\n";
+        if (sensorInputLibrary.is_string())
+            sensorInputLibraryPath = sensorInputLibrary.get<string>();
+    }
+    cout << "Using sensor input library" << sensorInputLibraryPath << "\n";
+
+    CpuModelCarrier carrier(model, sensorInputLibraryPath);
     if (!modelRunner.Run(carrier))
     {
         cout << "Cannot run model, stopping\n";

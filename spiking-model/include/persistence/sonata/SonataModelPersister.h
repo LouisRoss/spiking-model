@@ -68,7 +68,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
             return true;
         }
 
-        bool ReadModel(CpuModelCarrier& carrier, json& configuration) override
+        bool ReadModel(CpuModelCarrier& carrier, ConfigurationUtilities& configuration) override
         {
             auto& circuitConfiguration = sonataRepository_.GetConfiguration(NETWORK_CONFIGURATION_NAME);
             auto networks = circuitConfiguration[NETWORK_NETWORKS];

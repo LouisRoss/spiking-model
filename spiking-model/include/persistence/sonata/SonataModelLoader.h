@@ -8,6 +8,7 @@
 
 #include "nlohmann/json.hpp"
 
+#include "ModelEngineCommon.h"
 #include "CpuModelCarrier.h"
 #include "NeuronModelHelper.h"
 #include "NeuronNode.h"
@@ -27,6 +28,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
     using embeddedpenguins::neuron::infrastructure::NeuronType;
     using embeddedpenguins::neuron::infrastructure::NeuronNode;
     using embeddedpenguins::neuron::infrastructure::CpuModelCarrier;
+    using embeddedpenguins::modelengine::ConfigurationUtilities;
 
     class SonataModelLoader
     {
@@ -45,7 +47,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
             
         }
 
-        void LoadModel(CpuModelCarrier& carrier, json& configuration)
+        void LoadModel(CpuModelCarrier& carrier, ConfigurationUtilities& configuration)
         {
             NeuronModelHelper<CpuModelCarrier> helper(carrier, configuration);
 

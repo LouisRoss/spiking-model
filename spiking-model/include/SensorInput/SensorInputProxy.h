@@ -7,8 +7,7 @@
 #include <iostream>
 #include <dlfcn.h>
 
-#include "nlohmann/json.hpp"
-
+#include "ModelEngineCommon.h"
 #include "ISensorInput.h"
 
 namespace embeddedpenguins::neuron::infrastructure::sensorinput
@@ -17,11 +16,11 @@ namespace embeddedpenguins::neuron::infrastructure::sensorinput
     using std::vector;
     using std::cout;
 
-    using nlohmann::json;
+    using embeddedpenguins::modelengine::ConfigurationUtilities;
 
     class SensorInputProxy : public ISensorInput
     {
-        using SensorInputCreator = ISensorInput* (*)(const json&);
+        using SensorInputCreator = ISensorInput* (*)(const ConfigurationUtilities&);
         using SensorInputDeleter = void (*)(ISensorInput*);
 
         const string sensorInputSharedLibraryPath_ {};
@@ -36,6 +35,7 @@ namespace embeddedpenguins::neuron::infrastructure::sensorinput
 
     public:
         const string& ErrorReason() const { return errorReason_; }
+        const bool Valid() const { return valid_; }
 
     public:
         //
@@ -45,7 +45,6 @@ namespace embeddedpenguins::neuron::infrastructure::sensorinput
         SensorInputProxy(const string& sensorInputSharedLibraryPath) :
             sensorInputSharedLibraryPath_(sensorInputSharedLibraryPath)
         {
-            cout << "SensorInputProxy ctor(" << sensorInputSharedLibraryPath << ")\n";
         }
 
         ~SensorInputProxy() override
@@ -57,7 +56,7 @@ namespace embeddedpenguins::neuron::infrastructure::sensorinput
                 dlclose(sensorInputLibrary_);
         }
 
-        void CreateProxy(const json& configuration)
+        void CreateProxy(const ConfigurationUtilities& configuration)
         {
             LoadISensorInput();
             if (createSensorInput_ != nullptr)

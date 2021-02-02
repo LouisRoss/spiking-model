@@ -1,10 +1,12 @@
 #pragma once
 
+#include "ModelEngineCommon.h"
+
 #include "ModelNeuronInitializer.h"
 
 namespace embeddedpenguins::neuron::infrastructure
 {
-    using nlohmann::json;
+    using embeddedpenguins::modelengine::ConfigurationUtilities;
     using embeddedpenguins::neuron::infrastructure::ModelNeuronInitializer;
     using embeddedpenguins::neuron::infrastructure::NeuronOperation;
     using embeddedpenguins::neuron::infrastructure::NeuronRecord;
@@ -19,7 +21,7 @@ namespace embeddedpenguins::neuron::infrastructure
     class ModelLayerInitializer : public ModelNeuronInitializer<MODELHELPERTYPE>
     {
     public:
-        ModelLayerInitializer(json& configuration, MODELHELPERTYPE helper) :
+        ModelLayerInitializer(ConfigurationUtilities& configuration, MODELHELPERTYPE helper) :
             ModelNeuronInitializer<MODELHELPERTYPE>(configuration, helper)
         {
         }
@@ -35,7 +37,7 @@ namespace embeddedpenguins::neuron::infrastructure
             this->InitializeAnInput(0, 4);
             this->InitializeAnInput(0, 5);
 
-            this->strength_ = this->configuration_["Model"]["InitialSynapticStrength"];
+            this->strength_ = this->configuration_.Configuration()["Model"]["InitialSynapticStrength"];
             for (auto row = 0; row < this->height_ - 1; row++)
             {
                 InitializeARow(row, row + 1);

@@ -11,6 +11,10 @@ class configuration:
     configuration_path = './'
     control_file = None
 
+    width = 50
+    height = 25
+    max_index = 0
+
     def __init__(self):
         if not self.parse_arguments():
             return
@@ -18,6 +22,7 @@ class configuration:
         self.load_control()
         self.load_configuration()
         self.load_monitor()
+        self.load_dimensions()
 
     def parse_arguments(self):
         if len(sys.argv) < 2:
@@ -60,6 +65,14 @@ class configuration:
             self.monitor = json.load(f)
         print("Using monitor path '" + monitor_full_path + "'")
 
+    def load_dimensions(self):
+        if 'Model' in self.configuration and 'Dimensions' in self.configuration['Model']:
+            dimension_element = self.configuration['Model']['Dimensions']
+            self.width = dimension_element[0]
+            self.height = dimension_element[1]
+
+        self.max_index_ = self.width * self.height
+
     def find_projectpath(self):
         if 'PostProcessing' not in self.configuration:
             print ('Required "PostProcessing" section not in configuration file, unable to find project path')
@@ -75,3 +88,23 @@ class configuration:
         print('Using project name ' + project_name + ", and record path " + projectpath)
         Path(projectpath).mkdir(parents=True, exist_ok=True)
         return projectpath
+
+    def resolve_neuron_index(self, position):
+        return position[0] * self.width + position[1]
+
+    def get_neuron_index(self, neuron_name):
+        if 'Model' not in self.configuration:
+            print ('Required "Model" section not in configuration, unable to resolve neuron "' + neuron_name + '"')
+            return 1<<30
+
+        if 'Neurons' not in self.configuration['Model']:
+            print ('Required key "Neurons" not in configuration "Model" section, unable to resolve neuron "' + neuron_name + '"')
+            return 1<<30
+
+        named_neurons_element = self.configuration['Model']['Neurons']
+        
+        if neuron_name not in named_neurons_element:
+            print ('Neuron "' + neuron_name + '" not listed in "Neurons" element, unable to resolve neuron')
+            return 1<<30
+
+        return self.resolve_neuron_index(named_neurons_element[neuron_name])

@@ -3,9 +3,8 @@
 #include <string>
 #include <vector>
 
-#include "nlohmann/json.hpp"
-
 #include "NeuronNode.h"
+#include "ModelEngineCommon.h"
 #include "SensorInput/SensorInputProxy.h"
 
 namespace embeddedpenguins::neuron::infrastructure
@@ -13,21 +12,19 @@ namespace embeddedpenguins::neuron::infrastructure
     using std::string;
     using std::vector;
 
-    using nlohmann::json;
-
+    using embeddedpenguins::modelengine::ConfigurationUtilities;
     using embeddedpenguins::neuron::infrastructure::sensorinput::SensorInputProxy;
 
     struct CpuModelCarrier
     {
         vector<NeuronNode>& Model;
-        SensorInputProxy sensorInput_;
+        SensorInputProxy SensorInput;
         unsigned long int ModelSize() { return Model.size(); }
 
-        CpuModelCarrier(vector<NeuronNode>& model, const string& sensorInputSharedLibraryPath, const json& configuration) : 
+        CpuModelCarrier(vector<NeuronNode>& model, const string& sensorInputSharedLibraryPath) : 
             Model(model), 
-            sensorInput_(sensorInputSharedLibraryPath)
+            SensorInput(sensorInputSharedLibraryPath)
         {
-            sensorInput_.CreateProxy(configuration);
         }
 
         CpuModelCarrier(const CpuModelCarrier& other) = delete;

@@ -6,6 +6,8 @@
 
 #include "nlohmann/json.hpp"
 
+#include "ModelEngineCommon.h"
+
 #include "NeuronCommon.h"
 #include "NeuronNode.h"
 #include "NeuronConnection.h"
@@ -20,14 +22,16 @@ namespace embeddedpenguins::neuron::infrastructure
 
     using nlohmann::json;
 
+    using embeddedpenguins::modelengine::ConfigurationUtilities;
+
     template<class ModelCarrier>
     class NeuronModelHelper
     {
         ModelCarrier& carrier_;
-        json& configuration_;
+        ConfigurationUtilities& configuration_;
 
     public:
-        NeuronModelHelper(ModelCarrier& carrier, json& configuration) :
+        NeuronModelHelper(ModelCarrier& carrier, ConfigurationUtilities& configuration) :
             carrier_(carrier),
             configuration_(configuration)
         {
@@ -36,13 +40,13 @@ namespace embeddedpenguins::neuron::infrastructure
 
         vector<NeuronNode>& Model() { return carrier_.Model; }
         ModelCarrier& Carrier() { return carrier_; }
-        const json& Configuration() const { return configuration_; }
+        const json& Configuration() const { return configuration_.Configuration(); }
 
         void InitializeModel(unsigned long int modelSize = 0)
         {
             auto size = modelSize;
             if (size == 0)
-                size = (configuration_["Model"]["ModelSize"]).get<int>();
+                size = (configuration_.Configuration()["Model"]["ModelSize"]).get<int>();
 
             carrier_.Model.resize(size);
 

@@ -1,40 +1,65 @@
 #pragma once
+
+#include <iostream>
+#include <fstream>
 #include <map>
 
 #include "nlohmann/json.hpp"
+
+#include "ModelEngineCommon.h"
 
 #include "SensorInput/ISensorInput.h"
 
 namespace embeddedpenguins::neuron::infrastructure::sensorinput
 {
+    using std::cout;
+    using std::ifstream;
     using std::multimap;
     using std::make_pair;
+
     using nlohmann::json;
+
+    using embeddedpenguins::modelengine::ConfigurationUtilities;
 
     class SensorInputFile : public ISensorInput
     {
-        const json& configuration_;
+        const ConfigurationUtilities& configuration_;
+        nlohmann::ordered_json inputStream_ {};
         multimap<int, unsigned long long int> signalToInject_ {};
         vector<unsigned long long> signalToReturn_ {};
 
     public:
-        SensorInputFile(const json& configuration) :
+        SensorInputFile(const ConfigurationUtilities& configuration) :
             configuration_(configuration)
         {
-            // Test only, remove.
-            for (int i = 1; i < 6; i++)
-            {
-                signalToInject_.insert(make_pair((i*3)+0, 1));
-                signalToInject_.insert(make_pair((i*3)-1, 2));
-                signalToInject_.insert(make_pair((i*3)-2, 3));
-                signalToInject_.insert(make_pair((i*3)-3, 4));
-                signalToInject_.insert(make_pair((i*3)-4, 5));
-            }
         }
 
         // ISensorInput implementaton
         virtual bool Connect(const string& connectionString) override
         {
+            auto sensorFile = connectionString;
+            auto& postProcessingSection = configuration_.Configuration()["PostProcessing"];
+            if (!postProcessingSection.is_null() && postProcessingSection.contains("SensorInputFile"))
+            {
+                const auto& sensorInputFile = postProcessingSection["SensorInputFile"];
+                if (sensorInputFile.is_string())
+                    sensorFile = sensorInputFile.get<string>();
+            }
+
+            if (sensorFile.empty())
+            {
+                cout << "Connect found no sensor file named or configured, cannot connect\n";
+                return false;
+            }
+
+            sensorFile = configuration_.ExtractRecordDirectory() + sensorFile;
+            cout << "Connect using sensor file " << sensorFile << "\n";
+
+            ifstream sensorStream(sensorFile);
+            if (!sensorStream) return false;
+
+            sensorStream >> inputStream_;
+            cout << inputStream_ << "\n";
             return true;
         }
 
@@ -47,6 +72,30 @@ namespace embeddedpenguins::neuron::infrastructure::sensorinput
         {
             signalToReturn_.clear();
 
+            auto done = inputStream_.empty();
+            while (!done)
+            {
+                auto nextSignal = inputStream_.begin();
+                auto nextSignalTick = std::stoi(nextSignal.key());
+                if (nextSignalTick < 0 || nextSignalTick <= tickNow)
+                {
+                    auto& indexList = nextSignal.value();
+                    if (indexList.is_array())
+                    {
+                        const auto& indexes = indexList.get<vector<int>>();
+                        signalToReturn_.insert(signalToReturn_.end(), indexes.begin(), indexes.end());
+                    }
+
+                    inputStream_.erase(nextSignal);
+                    done = inputStream_.empty();
+                }
+                else
+                {
+                    done = true;
+                }
+            };
+
+/*
             auto done = signalToInject_.empty();
             while (!done)
             {
@@ -62,7 +111,7 @@ namespace embeddedpenguins::neuron::infrastructure::sensorinput
                     done = true;
                 }
             };
-
+*/
             return signalToReturn_;
         }
 
