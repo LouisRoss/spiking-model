@@ -1,6 +1,15 @@
 BDIR=../bin
 
-all: $(BDIR)/mes.py $(BDIR)/mem.py $(BDIR)/mev.py $(BDIR)/mec.py $(BDIR)/np.py $(BDIR)/nn.py $(BDIR)/nnclean.py $(BDIR)/nnplot.py $(BDIR)/nntidy.py
+_INPUTGENDEPS = nngenlayer.py nngenanticipate.py
+INPUTGENDEPS = $(patsubst %,$(BDIR)/%,$(_INPUTGENDEPS))
+
+_FRAMEWORKDEPS = nn.py nnclean.py nnplot.py nntidy.py mes.py 
+FRAMEWORKDEPS = $(patsubst %,$(BDIR)/%,$(_FRAMEWORKDEPS))
+
+_DEPRECATEDDEPS = mem.py mev.py mec.py np.py
+DEPRECATEDDEPS = $(patsubst %,$(BDIR)/%,$(_DEPRECATEDDEPS))
+
+all: $(INPUTGENDEPS) $(FRAMEWORKDEPS)
 .PHONY: all
 
 $(BDIR)/mes.py: mes.py
@@ -29,4 +38,10 @@ $(BDIR)/nnplot.py: nnplot.py
 
 $(BDIR)/nntidy.py: nntidy.py
 	cp nntidy.py $(BDIR)/
+
+$(BDIR)/nngenlayer.py: nngenlayer.py
+	cp nngenlayer.py $(BDIR)/
+
+$(BDIR)/nngenanticipate.py: nngenanticipate.py
+	cp nngenanticipate.py $(BDIR)/
 

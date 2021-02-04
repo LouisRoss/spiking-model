@@ -43,6 +43,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
         {
             auto& simulationConfiguration = sonataRepository_.GetConfiguration(SIMULATION_CONFIGURATION_NAME);
             auto inputs = simulationConfiguration[NETWORK_INPUTS];
+
             auto success = true;
             for (auto& inputClass : inputs)
             {

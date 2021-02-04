@@ -6,6 +6,8 @@
 
 #include "nlohmann/json.hpp"
 
+#include "ModelEngineCommon.h"
+
 #include "NeuronCommon.h"
 #include "NeuronNode.h"
 #include "NeuronConnection.h"
@@ -20,33 +22,36 @@ namespace embeddedpenguins::neuron::infrastructure
 
     using nlohmann::json;
 
+    using embeddedpenguins::modelengine::ConfigurationUtilities;
+
     template<class ModelCarrier>
     class NeuronModelHelper
     {
-        vector<NeuronNode>& model_;
-        json& configuration_;
+        ModelCarrier& carrier_;
+        ConfigurationUtilities& configuration_;
 
     public:
-        NeuronModelHelper(ModelCarrier model, json& configuration) :
-            model_(model.Model),
+        NeuronModelHelper(ModelCarrier& carrier, ConfigurationUtilities& configuration) :
+            carrier_(carrier),
             configuration_(configuration)
         {
             
         }
 
-        vector<NeuronNode>& Model() { return model_; }
-        const json& Configuration() const { return configuration_; }
+        vector<NeuronNode>& Model() { return carrier_.Model; }
+        ModelCarrier& Carrier() { return carrier_; }
+        const json& Configuration() const { return configuration_.Configuration(); }
 
         void InitializeModel(unsigned long int modelSize = 0)
         {
             auto size = modelSize;
             if (size == 0)
-                size = (configuration_["Model"]["ModelSize"]).get<int>();
+                size = (configuration_.Configuration()["Model"]["ModelSize"]).get<int>();
 
-            model_.resize(size);
+            carrier_.Model.resize(size);
 
             auto longTimeInThePast = numeric_limits<unsigned long long int>::max() - 1000ULL;
-            for (auto& neuron : model_)
+            for (auto& neuron : carrier_.Model)
             {
                 neuron.TickLastSpike = longTimeInThePast;
 
@@ -66,7 +71,7 @@ namespace embeddedpenguins::neuron::infrastructure
 
         void WireInput(unsigned long int sourceNodeIndex, int synapticWeight)
         {
-            auto& sourceNode = model_[sourceNodeIndex];
+            auto& sourceNode = carrier_.Model[sourceNodeIndex];
 
             sourceNode.Synapses[0].IsUsed = true;
             sourceNode.Synapses[0].Strength = synapticWeight;
@@ -77,9 +82,9 @@ namespace embeddedpenguins::neuron::infrastructure
 
         void Wire(unsigned long long int sourceNodeIndex, unsigned long long int targetNodeIndex, int synapticWeight)
         {
-            auto& sourceNode = model_[sourceNodeIndex];
+            auto& sourceNode = carrier_.Model[sourceNodeIndex];
             auto sourceSynapseIndex = FindNextUnusedSourceConnection(sourceNode);
-            auto& targetNode = model_[targetNodeIndex];
+            auto& targetNode = carrier_.Model[targetNodeIndex];
             auto targetSynapseIndex = FindNextUnusedTargetSynapse(targetNode);
 
             if (sourceSynapseIndex != -1 && targetSynapseIndex != -1)
@@ -98,20 +103,25 @@ namespace embeddedpenguins::neuron::infrastructure
 
         NeuronType GetNeuronType(const unsigned long long int source) const
         {
-            return model_[source].Type;
+            return carrier_.Model[source].Type;
         }
 
-        void SetNeuronType(const unsigned long long int source, NeuronType type)
+        void SetExcitatoryNeuronType(const unsigned long long int source)
         {
-            model_[source].Type = type;
+            carrier_.Model[source].Type = NeuronType::Excitatory;
         }
 
+        void SetInhibitoryNeuronType(const unsigned long long int source)
+        {
+            carrier_.Model[source].Type = NeuronType::Inhibitory;
+        }
+        
         tuple<unsigned long int, unsigned long int> FindRequiredSynapseCounts()
         {
             unsigned long int postsynapticConnections {};
             unsigned long int presynapticConnections {};
 
-            for (const auto& node : model_)
+            for (const auto& node : carrier_.Model)
             {
                 postsynapticConnections = std::max(postsynapticConnections, node.RequiredPostsynapticConnections);
                 presynapticConnections = std::max(presynapticConnections, node.RequiredPresynapticConnections);

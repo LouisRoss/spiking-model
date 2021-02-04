@@ -6,8 +6,7 @@
 #include <math.h>
 #include <chrono>
 
-#include "nlohmann/json.hpp"
-
+#include "ModelEngineCommon.h"
 #include "WorkerThread.h"
 #include "WorkItem.h"
 #include "ProcessCallback.h"
@@ -21,26 +20,26 @@
 namespace embeddedpenguins::neuron::infrastructure
 {
     using std::vector;
-    using std::pair;
     using std::for_each;
     using std::cout;
     using std::floor;
     using std::chrono::milliseconds;
     using time_point = std::chrono::high_resolution_clock::time_point;
 
-    using nlohmann::json;
-
     using ::embeddedpenguins::modelengine::threads::WorkerThread;
     using ::embeddedpenguins::modelengine::threads::ProcessCallback;
     using ::embeddedpenguins::modelengine::Log;
     using ::embeddedpenguins::modelengine::Recorder;
     using ::embeddedpenguins::modelengine::WorkItem;
+    using ::embeddedpenguins::modelengine::ConfigurationUtilities;
 
     class NeuronImplementation : public WorkerThread<NeuronOperation, NeuronImplementation, NeuronRecord>
     {
+        bool sensorConnected_ { false };
+        bool sensorConnectFailed_ { false };
         int workerId_;
-        CpuModelCarrier carrier_;
-        const json& configuration_;
+        CpuModelCarrier& carrier_;
+        const ConfigurationUtilities& configuration_;
 
     public:
         NeuronImplementation() = delete;
@@ -48,18 +47,34 @@ namespace embeddedpenguins::neuron::infrastructure
         // Required constructor.
         // Allow the template library to pass in the model
         // for each worker thread that is created.
-        NeuronImplementation(int workerId, CpuModelCarrier carrier, const json& configuration) :
+        NeuronImplementation(int workerId, CpuModelCarrier& carrier, const ConfigurationUtilities& configuration) :
             workerId_(workerId),
             carrier_(carrier),
             configuration_(configuration)
         {
-            
         }
 
-        void Initialize(Log& log, Recorder<NeuronRecord>& record, 
+        void StreamNewInputWork(Log& log, Recorder<NeuronRecord>& record, 
             unsigned long long int tickNow, 
             ProcessCallback<NeuronOperation, NeuronRecord>& callback)
         {
+            if (sensorConnectFailed_) return;
+            if (!ConnectSensor()) return;
+            if (!sensorConnected_ || !carrier_.SensorInput.Valid()) return;
+
+            auto& streamedInput = carrier_.SensorInput.StreamInput(tickNow);
+            if (!streamedInput.empty())
+            {
+                log.Logger() << "Checking for signal to inject at tick " << tickNow << " with " << streamedInput.size() << " signals\n";
+                log.Logit();
+            }
+
+            for (auto nodeIndex : streamedInput)
+            {
+                log.Logger() << "Injecting signal for neuron " << nodeIndex << "\n";
+                log.Logit();
+                callback(NeuronOperation(nodeIndex, Operation::Spike, 0), 0);
+            }
         }
 
         void Process(Log& log, Recorder<NeuronRecord>& record, 
@@ -76,11 +91,37 @@ namespace embeddedpenguins::neuron::infrastructure
             }
         }
 
-        void Finalize(Log& log, Recorder<NeuronRecord>& record, unsigned long long int tickNow)
+    private:
+        bool ConnectSensor()
         {
+            if (sensorConnected_) return true;
+            if (sensorConnectFailed_) return false;
+
+            carrier_.SensorInput.CreateProxy(configuration_);
+
+            auto& errorLibraryReason = carrier_.SensorInput.ErrorReason();
+            if (!carrier_.SensorInput.Valid() || !errorLibraryReason.empty())
+            {
+                cout << "Unable to use sensor input library: " << errorLibraryReason << "\n";
+                sensorConnectFailed_ = true;
+                return false;
+            }
+
+            carrier_.SensorInput.Connect("");
+
+            auto& errorConnectReason = carrier_.SensorInput.ErrorReason();
+            if (!carrier_.SensorInput.Valid() || !errorConnectReason.empty())
+            {
+                cout << "Unable to connect to sensor input library: " << errorConnectReason << "\n";
+                sensorConnectFailed_ = true;
+                return false;
+            }
+
+            sensorConnected_ = true;
+            sensorConnectFailed_ = false;
+            return true;
         }
 
-    private:
         void ProcessWorkItem(Log& log, Recorder<NeuronRecord>& record, 
             unsigned long long int ticksSinceEpoch, 
             const NeuronOperation& work, 

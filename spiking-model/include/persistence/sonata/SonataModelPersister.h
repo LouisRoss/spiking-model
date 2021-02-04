@@ -14,6 +14,7 @@
 #include "SonataNodeModelLoader.h"
 #include "SonataEdgeModelLoader.h"
 #include "SonataModelLoader.h"
+#include "CpuModelCarrier.h"
 
 namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
 {
@@ -21,10 +22,11 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
     using std::ifstream;
     using nlohmann::json;
     using embeddedpenguins::neuron::infrastructure::NeuronNode;
+    using embeddedpenguins::neuron::infrastructure::CpuModelCarrier;
 
     //
     //
-    class SonataModelPersister : public IModelPersister<NeuronNode>
+    class SonataModelPersister : public IModelPersister<CpuModelCarrier>
     {
         string sonataConfigurationFilePath_;
         SonataModelRepository& sonataRepository_;
@@ -66,7 +68,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
             return true;
         }
 
-        bool ReadModel(vector<NeuronNode>& model, json& configuration) override
+        bool ReadModel(CpuModelCarrier& carrier, ConfigurationUtilities& configuration) override
         {
             auto& circuitConfiguration = sonataRepository_.GetConfiguration(NETWORK_CONFIGURATION_NAME);
             auto networks = circuitConfiguration[NETWORK_NETWORKS];
@@ -89,7 +91,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
             edgeLoader.MapEdges(edges);
 
             SonataModelLoader modelLoader(nodeLoader.Populations(), edgeLoader.ModelConnections());
-            modelLoader.LoadModel(model, configuration);
+            modelLoader.LoadModel(carrier, configuration);
 
             return true;
         }
