@@ -50,8 +50,8 @@ using std::chrono::ceil;
 std::string cls("\033[2J\033[H");
 bool displayOn = true;
 
-char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier);
-void PrintNeuronScan(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier);
+char PrintAndListenForQuit(ModelRunner<NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier);
+void PrintNeuronScan(ModelRunner<NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier);
 char MapIntensity(int activation);
 void ParseArguments(int argc, char* argv[]);
 
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
 {
     ParseArguments(argc, argv);
     vector<NeuronNode> model;
-    ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord> modelRunner(argc, argv);
+    ModelRunner<NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord> modelRunner(argc, argv);
     //TestBmtkLoading(modelRunner.ConfigurationCarrier());
 
     cout << "Discovering sensor input library\n";
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier)
+char PrintAndListenForQuit(ModelRunner<NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier)
 {
     char c;
     {
@@ -140,7 +140,7 @@ char PrintAndListenForQuit(ModelRunner<NeuronNode, NeuronOperation, NeuronImplem
     return c;
 }
 
-void PrintNeuronScan(ModelRunner<NeuronNode, NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier)
+void PrintNeuronScan(ModelRunner<NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier)
 {
     cout << cls;
 
