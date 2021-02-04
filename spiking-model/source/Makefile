@@ -25,7 +25,7 @@ INITIALIZERDEPS = $(patsubst %,./%,$(_INITIALIZERDEPS))
 _SENSORINPUTCOREDEPS = SensorInput/ISensorInput.h SensorInput/SensorInputProxy.h 
 SENSORINPUTCOREDEPS = $(patsubst %,$(ILDIR)/%,$(_SENSORINPUTCOREDEPS))
 
-_SENSORINPUTDEPS = SensorInputFile.h
+_SENSORINPUTDEPS = SensorInputFile.h SensorSonataFile.h
 SENSORINPUTDEPS = $(patsubst %,./%,$(_SENSORINPUTDEPS))
 
 _SONATADEPS = persistence/sonata/SonataCompiledModel.h persistence/sonata/SonataEdgeModel.h persistence/sonata/SonataEdgeModelLoader.h persistence/sonata/SonataInputSpikeLoader.h persistence/sonata/SonataModelLoader.h persistence/sonata/SonataModelPersister.h persistence/sonata/SonataModelRepository.h persistence/sonata/SonataNodeModel.h persistence/sonata/SonataNodeModelLoader.h
@@ -37,7 +37,7 @@ LOCALDEPS = $(patsubst %,./%,$(_LOCALDEPS))
 $(ODIR)/%.o: %.cpp $(DEPS) $(NEURONDEPS) $(INITIALIZERDEPS) $(SENSORINPUTCOREDEPS) $(SENSORINPUTDEPS) $(SONATADEPS) $(LOCALDEPS)
 	$(CC) -c -o $@ $< $(CCFLAGS) $(LOG)
 
-all: $(BDIR)/NeuronModel $(BDIR)/ModelLayerInitializer.so $(BDIR)/ModelAnticipateInitializer.so $(BDIR)/ModelSonataInitializer.so $(BDIR)/SensorInputFile.so
+all: $(BDIR)/NeuronModel $(BDIR)/ModelLayerInitializer.so $(BDIR)/ModelAnticipateInitializer.so $(BDIR)/ModelSonataInitializer.so $(BDIR)/SensorInputFile.so $(BDIR)/SensorSonataFile.so
 .PHONY: all
 
 log:
@@ -58,6 +58,9 @@ $(BDIR)/ModelSonataInitializer.so: $(ODIR)/ModelSonataInitializer.o
 	$(CC) -shared -o $@ $^ $(LFLAGS) $(LIBS)
 
 $(BDIR)/SensorInputFile.so:  $(ODIR)/SensorInputFile.o
+	$(CC) -shared -o $@ $^ $(LFLAGS) $(LIBS)
+
+$(BDIR)/SensorSonataFile.so:  $(ODIR)/SensorSonataFile.o
 	$(CC) -shared -o $@ $^ $(LFLAGS) $(LIBS)
 
 .PHONY: clean

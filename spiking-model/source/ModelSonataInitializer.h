@@ -86,33 +86,5 @@ namespace embeddedpenguins::neuron::infrastructure
             }
 #endif
         }
-/*
-        virtual void InjectSignal(ProcessCallback<NeuronOperation, NeuronRecord>& callback) override
-        {
-#ifndef TESTING
-            SonataInputSpikeLoader spikeLoader(*sonataRepository_);
-            spikeLoader.LoadSpikes(500);  // Is this number available in the LGN part of the configuration?
-            spikeLoader.PersistSpikes("spikes.csv");
-
-            auto& spikeTimesAndNodes = spikeLoader.Spikes();
-            for (auto [spikeTime, spikeNode] : spikeTimesAndNodes)
-            {
-                //if (spikeNode == 47)
-                //{
-                //    cout << "Initializing neuron 47 to spike at time " << (int)spikeTime << '\n';
-                //}
-                callback(NeuronOperation(spikeNode, Operation::Spike, 0), (int)spikeTime + 1000);
-            }
-#else
-            for (auto i = 0; i < 3000; i += 250)
-            {
-                    callback(NeuronOperation(47, Operation::Spike, 0), i);
-                    callback(NeuronOperation(285, Operation::Spike, 0), i);
-                    callback(NeuronOperation(312, Operation::Spike, 0), i);
-                    callback(NeuronOperation(471, Operation::Spike, 0), i);
-            }
-#endif
-        }
-*/
     };
 }

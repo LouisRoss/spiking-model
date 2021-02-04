@@ -17,7 +17,6 @@
     "Execution":
     {
         "ModelExecutable": "./NeuronModel",
-        "ModelOptions": "-d",
         "InitializerLocation": "./ModelAnticipateInitializer.so",
         "InputStreamer": "./SensorInputFile.so"
     },
