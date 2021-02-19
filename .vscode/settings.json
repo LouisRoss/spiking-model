@@ -3,6 +3,7 @@
         "chrono": "cpp",
         "*.tcc": "cpp",
         "string": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "condition_variable": "cpp"
     }
 }
