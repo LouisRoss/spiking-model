@@ -2,6 +2,15 @@
 
 mkdir ./include
 
+git clone https://github.com/LouisRoss/spiking-model-core.git
+mkdir spiking-model/include/core
+cp -rf spiking-model-core/include/* spiking-model/include/core
+cp -R spiking-model-core/ui spiking-model/
+cp -R spiking-model-core/config spiking-model/
+rm -rf spiking-model-core/*
+rm -rf spiking-model-core/\.*
+rmdir spiking-model-core
+
 git clone https://github.com/LouisRoss/modelengine.git
 cp -r modelengine/include/* ./include
 rm -rf modelengine/*

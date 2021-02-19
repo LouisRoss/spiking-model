@@ -22,3 +22,6 @@ include/nlohmann/detail/conversions/*hpp
 include/nlohmann/detail/input/*hpp
 include/nlohmann/detail/output/*hpp
 include/nlohmann/thirdparty/hedley/*hpp
+spiking-model/config/core/*
+spiking-model/config/*
+spiking-model/ui/*
