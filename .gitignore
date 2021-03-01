@@ -22,8 +22,8 @@ include/nlohmann/detail/conversions/*hpp
 include/nlohmann/detail/input/*hpp
 include/nlohmann/detail/output/*hpp
 include/nlohmann/thirdparty/hedley/*hpp
-spiking-model/include/Initializers/*
 spiking-model/include/NeuronRecordCommon.h
-spiking-model/include/SensorInputs/*
+include/Initializers/*
+include/SensorInputs/*
 spiking-model/config/*
 spiking-model/ui/*
