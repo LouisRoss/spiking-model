@@ -6,6 +6,7 @@
 #include "sys/stat.h"
 #include "nlohmann/json.hpp"
 
+#include "ConfigurationRepository.h"
 #include "sdk/IModelPersister.h"
 
 #include "NeuronNode.h"
@@ -21,6 +22,9 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
     using std::cout;
     using std::ifstream;
     using nlohmann::json;
+
+    using ::embeddedpenguins::core::neuron::model::ConfigurationRepository;
+
     using embeddedpenguins::neuron::infrastructure::NeuronNode;
     using embeddedpenguins::neuron::infrastructure::CpuModelCarrier;
 
@@ -68,7 +72,7 @@ namespace embeddedpenguins::neuron::infrastructure::persistence::sonata
             return true;
         }
 
-        bool ReadModel(CpuModelCarrier& carrier, ConfigurationUtilities& configuration) override
+        bool ReadModel(CpuModelCarrier& carrier, const ConfigurationRepository& configuration) override
         {
             auto& circuitConfiguration = sonataRepository_.GetConfiguration(NETWORK_CONFIGURATION_NAME);
             auto networks = circuitConfiguration[NETWORK_NETWORKS];

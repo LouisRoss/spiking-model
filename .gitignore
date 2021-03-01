@@ -27,3 +27,6 @@ include/Initializers/*
 include/SensorInputs/*
 spiking-model/config/*
 spiking-model/ui/*
+spiking-model/source/NeuronModel/obj/*o
+spiking-model/source/Initializers/obj/*o
+spiking-model/source/SensorInputs/obj/*o

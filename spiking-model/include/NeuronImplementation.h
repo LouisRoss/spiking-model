@@ -6,7 +6,8 @@
 #include <math.h>
 #include <chrono>
 
-#include "ModelEngineCommon.h"
+#include "ConfigurationRepository.h"
+
 #include "WorkerThread.h"
 #include "WorkItem.h"
 #include "ProcessCallback.h"
@@ -14,6 +15,7 @@
 #include "NeuronOperation.h"
 #include "NeuronNode.h"
 #include "CpuModelCarrier.h"
+#include "NeuronModelHelper.h"
 #include "NeuronRecord.h"
 #include "Log.h"
 
@@ -26,20 +28,21 @@ namespace embeddedpenguins::neuron::infrastructure
     using std::chrono::milliseconds;
     using time_point = std::chrono::high_resolution_clock::time_point;
 
+    using ::embeddedpenguins::core::neuron::model::ConfigurationRepository;
+
     using ::embeddedpenguins::modelengine::threads::WorkerThread;
     using ::embeddedpenguins::modelengine::threads::ProcessCallback;
     using ::embeddedpenguins::modelengine::Log;
     using ::embeddedpenguins::modelengine::Recorder;
     using ::embeddedpenguins::modelengine::WorkItem;
-    using ::embeddedpenguins::modelengine::ConfigurationUtilities;
 
     class NeuronImplementation : public WorkerThread<NeuronOperation, NeuronImplementation, NeuronRecord>
     {
         bool sensorConnected_ { false };
         bool sensorConnectFailed_ { false };
         int workerId_;
-        CpuModelCarrier& carrier_;
-        const ConfigurationUtilities& configuration_;
+        NeuronModelHelper<CpuModelCarrier>& helper_;
+        const ConfigurationRepository& configuration_;
 
     public:
         NeuronImplementation() = delete;
@@ -47,9 +50,9 @@ namespace embeddedpenguins::neuron::infrastructure
         // Required constructor.
         // Allow the template library to pass in the model
         // for each worker thread that is created.
-        NeuronImplementation(int workerId, CpuModelCarrier& carrier, const ConfigurationUtilities& configuration) :
+        NeuronImplementation(int workerId, NeuronModelHelper<CpuModelCarrier>& helper, const ConfigurationRepository& configuration) :
             workerId_(workerId),
-            carrier_(carrier),
+            helper_(helper),
             configuration_(configuration)
         {
         }
@@ -60,9 +63,9 @@ namespace embeddedpenguins::neuron::infrastructure
         {
             if (sensorConnectFailed_) return;
             if (!ConnectSensor()) return;
-            if (!sensorConnected_ || !carrier_.SensorInput.Valid()) return;
+            if (!sensorConnected_ || !helper_.Model().SensorInput.Valid()) return;
 
-            auto& streamedInput = carrier_.SensorInput.StreamInput(tickNow);
+            auto& streamedInput = helper_.Model().SensorInput.StreamInput(tickNow);
             if (!streamedInput.empty())
             {
                 log.Logger() << "Checking for signal to inject at tick " << tickNow << " with " << streamedInput.size() << " signals\n";
@@ -97,20 +100,20 @@ namespace embeddedpenguins::neuron::infrastructure
             if (sensorConnected_) return true;
             if (sensorConnectFailed_) return false;
 
-            carrier_.SensorInput.CreateProxy(configuration_);
+            helper_.Model().SensorInput.CreateProxy(configuration_);
 
-            auto& errorLibraryReason = carrier_.SensorInput.ErrorReason();
-            if (!carrier_.SensorInput.Valid() || !errorLibraryReason.empty())
+            auto& errorLibraryReason = helper_.Model().SensorInput.ErrorReason();
+            if (!helper_.Model().SensorInput.Valid() || !errorLibraryReason.empty())
             {
                 cout << "Unable to use sensor input library: " << errorLibraryReason << "\n";
                 sensorConnectFailed_ = true;
                 return false;
             }
 
-            carrier_.SensorInput.Connect("");
+            helper_.Model().SensorInput.Connect("");
 
-            auto& errorConnectReason = carrier_.SensorInput.ErrorReason();
-            if (!carrier_.SensorInput.Valid() || !errorConnectReason.empty())
+            auto& errorConnectReason = helper_.Model().SensorInput.ErrorReason();
+            if (!helper_.Model().SensorInput.Valid() || !errorConnectReason.empty())
             {
                 cout << "Unable to connect to sensor input library: " << errorConnectReason << "\n";
                 sensorConnectFailed_ = true;
@@ -160,7 +163,7 @@ namespace embeddedpenguins::neuron::infrastructure
             int synapseIndex, 
             ProcessCallback<NeuronOperation, NeuronRecord>& callback)
         {
-            auto& neuronNode = carrier_.Model[neuronIndex];
+            auto& neuronNode = helper_.Model().Model[neuronIndex];
 
             if (neuronNode.InRefractoryDelay)
             {
@@ -308,7 +311,7 @@ namespace embeddedpenguins::neuron::infrastructure
             unsigned long long int neuronIndex, 
             ProcessCallback<NeuronOperation, NeuronRecord>& callback)
         {
-            auto& neuronNode = carrier_.Model[neuronIndex];
+            auto& neuronNode = helper_.Model().Model[neuronIndex];
 
             if (neuronNode.Activation == 0 || neuronNode.InRefractoryDelay)
             {
@@ -350,7 +353,7 @@ namespace embeddedpenguins::neuron::infrastructure
             unsigned long long int neuronIndex, 
             ProcessCallback<NeuronOperation, NeuronRecord>& callback)
         {
-            auto& neuronNode = carrier_.Model[neuronIndex];
+            auto& neuronNode = helper_.Model().Model[neuronIndex];
 
             if (!neuronNode.InRefractoryDelay)
             {
