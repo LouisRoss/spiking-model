@@ -7,51 +7,59 @@
 #include "nlohmann/json.hpp"
 #include "highfive/H5Easy.hpp"
 
+#include "ConfigurationRepository.h"
 #include "ModelEngine.h"
+#include "sdk/ModelRunner.h"
+#include "sdk/KeyListener.h"
+
 #include "NeuronOperation.h"
 #include "NeuronImplementation.h"
 #include "NeuronNode.h"
 #include "NeuronRecord.h"
 #include "CpuModelCarrier.h"
-#include "ModelEngineCommon.h"
-#include "sdk/ModelRunner.h"
+#include "NeuronModelHelper.h"
+#include "CpuModelUi.h"
 #include "persistence/sonata/SonataModelRepository.h"
 #include "persistence/sonata/SonataModelPersister.h"
 #include "persistence/sonata/SonataInputSpikeLoader.h"
-#include "KeyListener.h"
 
 using namespace std;
 using namespace std::chrono;
 using namespace nlohmann;
 
+using embeddedpenguins::core::neuron::model::KeyListener;
+using embeddedpenguins::core::neuron::model::ConfigurationRepository;
+
 using embeddedpenguins::modelengine::ModelEngine;
 using embeddedpenguins::modelengine::sdk::ModelRunner;
+
 using embeddedpenguins::neuron::infrastructure::Operation;
 using embeddedpenguins::neuron::infrastructure::NeuronOperation;
 using embeddedpenguins::neuron::infrastructure::NeuronImplementation;
 using embeddedpenguins::neuron::infrastructure::NeuronNode;
 using embeddedpenguins::neuron::infrastructure::NeuronRecord;
 using embeddedpenguins::neuron::infrastructure::CpuModelCarrier;
-using embeddedpenguins::neuron::infrastructure::KeyListener;
-using embeddedpenguins::neuron::infrastructure::ConfigurationUtilities;
+using embeddedpenguins::neuron::infrastructure::NeuronModelHelper;
+using embeddedpenguins::neuron::infrastructure::CpuModelUi;
+
 using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelRepository;
 using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelPersister;
 using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataInputSpikeLoader;
-using std::vector;
-using std::chrono::nanoseconds;
-using std::chrono::system_clock;
-using std::chrono::high_resolution_clock;
-using std::chrono::duration_cast;
-using std::chrono::milliseconds;
-using std::chrono::ceil;
+//using std::vector;
+//using std::chrono::nanoseconds;
+//using std::chrono::system_clock;
+//using std::chrono::high_resolution_clock;
+//using std::chrono::duration_cast;
+//using std::chrono::milliseconds;
+//using std::chrono::ceil;
 
 //////////////////////////////////////////////////////////// CPU Code ////////////////////////////////////////////////////////////
 //
 std::string cls("\033[2J\033[H");
 bool displayOn = true;
 
-char PrintAndListenForQuit(ModelRunner<NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier);
-void PrintNeuronScan(ModelRunner<NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier);
+char PrintAndListenForQuit(ModelRunner<NeuronOperation, NeuronImplementation, NeuronModelHelper<CpuModelCarrier>, NeuronRecord>& modelRunner, CpuModelCarrier& carrier);
+void PrintNeuronScan(ModelRunner<NeuronOperation, NeuronImplementation, NeuronModelHelper<CpuModelCarrier>, NeuronRecord>& modelRunner, CpuModelCarrier& carrier);
 char MapIntensity(int activation);
 void ParseArguments(int argc, char* argv[]);
 
@@ -70,10 +78,11 @@ void PrintSynapses(vector<NeuronNode>& model)
     }
 }
 
-void TestBmtkLoading(ConfigurationUtilities& configuration)
+void TestBmtkLoading(ConfigurationRepository& configuration)
 {
     constexpr const char* configurationFilePath = "/home/louis/source/bmtk/workspace/chapter04/sim_ch04/simulation_config.json";
 
+#if false   // TODO - fix persister
     vector<NeuronNode> model {};
     CpuModelCarrier carrier(model, "./SensorInputFile.so");
     SonataModelRepository sonataRepository(configurationFilePath);
@@ -83,6 +92,7 @@ void TestBmtkLoading(ConfigurationUtilities& configuration)
 
     SonataInputSpikeLoader spikeLoader(persister.SonataRepository());
     spikeLoader.LoadSpikes(500);  // Is this number available in the LGN part of the configuration?
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -93,8 +103,9 @@ int main(int argc, char* argv[])
 {
     ParseArguments(argc, argv);
     vector<NeuronNode> model;
-    ModelRunner<NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord> modelRunner(argc, argv);
+    ModelRunner<NeuronOperation, NeuronImplementation, NeuronModelHelper<CpuModelCarrier>, NeuronRecord> modelRunner(argc, argv);
     //TestBmtkLoading(modelRunner.ConfigurationCarrier());
+
 
     cout << "Discovering sensor input library\n";
     string sensorInputLibraryPath {};
@@ -110,19 +121,23 @@ int main(int argc, char* argv[])
     cout << "Using sensor input library" << sensorInputLibraryPath << "\n";
 
     CpuModelCarrier carrier(model, sensorInputLibraryPath);
-    if (!modelRunner.Run(carrier))
+    NeuronModelHelper<CpuModelCarrier> helper(carrier, modelRunner.ConfigurationCarrier());
+    if (!modelRunner.Run(helper))
     {
         cout << "Cannot run model, stopping\n";
         return 1;
     }
 
-    PrintAndListenForQuit(modelRunner, carrier);
+    //PrintAndListenForQuit(modelRunner, carrier);
+    CpuModelUi ui(modelRunner, helper);
+    ui.ParseArguments(argc, argv);
+    ui.PrintAndListenForQuit();
 
     modelRunner.WaitForQuit();
     return 0;
 }
 
-char PrintAndListenForQuit(ModelRunner<NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier)
+char PrintAndListenForQuit(ModelRunner<NeuronOperation, NeuronImplementation, NeuronModelHelper<CpuModelCarrier>, NeuronRecord>& modelRunner, CpuModelCarrier& carrier)
 {
     char c;
     {
@@ -140,7 +155,7 @@ char PrintAndListenForQuit(ModelRunner<NeuronOperation, NeuronImplementation, Cp
     return c;
 }
 
-void PrintNeuronScan(ModelRunner<NeuronOperation, NeuronImplementation, CpuModelCarrier, NeuronRecord>& modelRunner, CpuModelCarrier& carrier)
+void PrintNeuronScan(ModelRunner<NeuronOperation, NeuronImplementation, NeuronModelHelper<CpuModelCarrier>, NeuronRecord>& modelRunner, CpuModelCarrier& carrier)
 {
     cout << cls;
 

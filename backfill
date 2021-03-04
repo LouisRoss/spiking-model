@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rsync -uR -v include/*h ../modelengine/
+rsync -uR -v include/sdk/*h ../modelengine/
+make --makefile backfill.mk

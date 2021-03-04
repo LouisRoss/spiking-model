@@ -6,7 +6,7 @@
 
 #include "nlohmann/json.hpp"
 
-#include "ModelEngineCommon.h"
+#include "ConfigurationRepository.h"
 
 #include "NeuronCommon.h"
 #include "NeuronNode.h"
@@ -22,33 +22,47 @@ namespace embeddedpenguins::neuron::infrastructure
 
     using nlohmann::json;
 
-    using embeddedpenguins::modelengine::ConfigurationUtilities;
+    using ::embeddedpenguins::core::neuron::model::ConfigurationRepository;
 
     template<class ModelCarrier>
     class NeuronModelHelper
     {
         ModelCarrier& carrier_;
-        ConfigurationUtilities& configuration_;
+        const ConfigurationRepository& configuration_;
+
+        unsigned long int width_ { 100 };
+        unsigned long int height_ { 100 };
+        unsigned long long int maxIndex_ { };
 
     public:
-        NeuronModelHelper(ModelCarrier& carrier, ConfigurationUtilities& configuration) :
+        NeuronModelHelper(ModelCarrier& carrier, const ConfigurationRepository& configuration) :
             carrier_(carrier),
             configuration_(configuration)
         {
             
         }
 
-        vector<NeuronNode>& Model() { return carrier_.Model; }
+        ModelCarrier& Model() { return carrier_; }
         ModelCarrier& Carrier() { return carrier_; }
         const json& Configuration() const { return configuration_.Configuration(); }
+        const ConfigurationRepository& Repository() const { return configuration_; }
+        const unsigned long int Width() const { return width_; }
+        const unsigned long int Height() const { return height_; }
+
+        bool AllocateModel(unsigned long int modelSize = 0)
+        {
+            if (!CreateModel(modelSize))
+            {
+                cout << "Unable to create model of size " << modelSize << "\n";
+                return false;
+            }
+
+            return true;
+        }
 
         void InitializeModel(unsigned long int modelSize = 0)
         {
-            auto size = modelSize;
-            if (size == 0)
-                size = (configuration_.Configuration()["Model"]["ModelSize"]).get<int>();
-
-            carrier_.Model.resize(size);
+            LoadOptionalDimensions();
 
             auto longTimeInThePast = numeric_limits<unsigned long long int>::max() - 1000ULL;
             for (auto& neuron : carrier_.Model)
@@ -69,6 +83,11 @@ namespace embeddedpenguins::neuron::infrastructure
             }
         }
 
+        unsigned long long int GetIndex(const int row, const int column) const
+        {
+            return row * width_ + column;
+        }
+
         void WireInput(unsigned long int sourceNodeIndex, int synapticWeight)
         {
             auto& sourceNode = carrier_.Model[sourceNodeIndex];
@@ -80,7 +99,7 @@ namespace embeddedpenguins::neuron::infrastructure
             sourceNode.RequiredPostsynapticConnections++;
         }
 
-        void Wire(unsigned long long int sourceNodeIndex, unsigned long long int targetNodeIndex, int synapticWeight)
+        void Wire(unsigned long int sourceNodeIndex, unsigned long int targetNodeIndex, int synapticWeight)
         {
             auto& sourceNode = carrier_.Model[sourceNodeIndex];
             auto sourceSynapseIndex = FindNextUnusedSourceConnection(sourceNode);
@@ -104,6 +123,44 @@ namespace embeddedpenguins::neuron::infrastructure
         NeuronType GetNeuronType(const unsigned long long int source) const
         {
             return carrier_.Model[source].Type;
+        }
+
+        short GetNeuronActivation(const unsigned long int source) const
+        {
+            return carrier_.Model[source].Activation;
+        }
+
+        unsigned long int GetNeuronTicksSinceLastSpike(const unsigned long int source)
+        {
+            return carrier_.Model[source].TickLastSpike;
+        }
+
+        bool IsSynapseUsed(const unsigned long int neuronIndex, const unsigned int synapseId)
+        {
+            auto& neuron = carrier_.Model[neuronIndex];
+            return neuron.Synapses[synapseId].IsUsed;
+        }
+
+        int GetSynapticStrength(const unsigned long int neuronIndex, const unsigned int synapseId)
+        {
+            auto& neuron = carrier_.Model[neuronIndex];
+            return neuron.Synapses[synapseId].Strength;
+        }
+
+        unsigned long int GetPresynapticNeuron(const unsigned long int neuronIndex, const unsigned int synapseId)
+        {
+            auto it = std::find_if(carrier_.Model.begin(), carrier_.Model.end(),
+            [neuronIndex, synapseId](auto& n){
+                for (auto& synapse : n.PostsynapticConnections)
+                {
+                    if (synapse.PostsynapticNeuron == neuronIndex && synapse.Synapse == synapseId)
+                        return true;
+                }
+
+                return false;
+            });
+
+            return std::distance(it, carrier_.Model.begin());
         }
 
         void SetExcitatoryNeuronType(const unsigned long long int source)
@@ -136,6 +193,55 @@ namespace embeddedpenguins::neuron::infrastructure
         }
 
     private:
+        //
+        // Allocate memory for the model.
+        // NOTE: Only to be called from the main process, not a load library.
+        //
+        bool CreateModel(unsigned long int modelSize)
+        {
+            auto size = modelSize;
+            if (size == 0)
+            {
+                const json& modelJson = configuration_.Configuration()["Model"];
+                if (!modelJson.is_null() && modelJson.contains("ModelSize"))
+                {
+                    const json& modelSizeJson = modelJson["ModelSize"];
+                    if (modelSizeJson.is_number_unsigned())
+                        size = modelSizeJson.get<unsigned int>();
+                }
+            }
+
+            if (size == 0)
+            {
+                cout << "No model size configured or supplied, initializer cannot create model\n";
+                carrier_.Valid = false;
+                return false;
+            }
+
+            carrier_.Model.resize(size);
+
+            return true;
+        }
+
+        void LoadOptionalDimensions()
+        {
+            // Override the dimension defaults if configured.
+            const json& configuration = configuration_.Configuration();
+            auto& modelSection = configuration["Model"];
+            if (!modelSection.is_null() && modelSection.contains("Dimensions"))
+            {
+                auto dimensionElement = modelSection["Dimensions"];
+                if (dimensionElement.is_array())
+                {
+                    auto dimensionArray = dimensionElement.get<std::vector<int>>();
+                    width_ = dimensionArray[0];
+                    height_ = dimensionArray[1];
+                }
+            }
+
+            maxIndex_ = width_ * height_;
+        }
+
         int FindNextUnusedSourceConnection(NeuronNode& sourceNeuron) const
         {
             for (auto i = 0; i < PostsynapticConnectionsPerNode; i++)

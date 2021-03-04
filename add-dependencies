@@ -2,7 +2,18 @@
 
 mkdir ./include
 
+git clone https://github.com/LouisRoss/spiking-model-core.git
+cp spiking-model-core/include/NeuronRecordCommon.h spiking-model/include/
+cp -R spiking-model-core/config spiking-model/
+cp -R spiking-model-core/ui spiking-model/
+rm -rf spiking-model-core/*
+rm -rf spiking-model-core/\.*
+rmdir spiking-model-core
+
 git clone https://github.com/LouisRoss/modelengine.git
+cd modelengine
+./add-dependencies
+cd ..
 cp -r modelengine/include/* ./include
 rm -rf modelengine/*
 rm -rf modelengine/\.*
