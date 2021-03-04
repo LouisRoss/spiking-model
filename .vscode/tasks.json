@@ -2,13 +2,31 @@
     "tasks": [
         {
             "type": "shell",
+            "label": "C/C++: g++ build active file",
+            "command": "make",
+            "args": [
+                "debug"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "shell",
             "label": "C/C++: g++-9 build active file",
             "command": "/usr/bin/g++-9",
             "args": [
                 "-g",
                 "${file}",
-                "-o",
                 "${fileDirname}/../../bin/${fileBasenameNoExtension}",
+                "-o",
                 "-I../../include",
                 "-I../include",
                 "-I/usr/include/hdf5/serial/",

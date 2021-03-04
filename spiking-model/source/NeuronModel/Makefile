@@ -5,6 +5,7 @@ CC=g++
 CCFLAGS=-I$(IDIR) -I$(ILDIR) -I$(IH5DIR) -fpic -pthread -std=c++17
 LFLAGS=-fpic -pthread -std=c++17
 LOG=-DNOLOG
+DEBUGFLAG=
 
 ODIR=obj
 BDIR=../../bin
@@ -29,14 +30,18 @@ _SONATADEPS = persistence/sonata/SonataCompiledModel.h persistence/sonata/Sonata
 SONATADEPS = $(patsubst %,$(ILDIR)/%,$(_SONATADEPS))
 
 $(BDIR)/NeuronModel: $(ODIR)/NeuronModel.o
-	$(CC) -o $@ $^ $(LFLAGS) $(LIBS)
+	$(CC) -o $@ $^ $(DEBUGFLAG) $(LFLAGS) $(LIBS)
 
 $(ODIR)/%.o: %.cpp $(DEPS) $(NEURONDEPS) $(INITIALIZERDEPS) $(SENSORINPUTDEPS) $(SONATADEPS)
 	mkdir -p $(ODIR)
-	$(CC) -c -o $@ $< $(CCFLAGS) $(LOG)
+	$(CC) -c -o $@ $< $(DEBUGFLAG) $(CCFLAGS) $(LOG)
 
 all: $(BDIR)/NeuronModel
 .PHONY: all
+
+debug:
+	make DEBUGFLAG="-g"
+.PHONY: debug
 
 log:
 	make LOG=""

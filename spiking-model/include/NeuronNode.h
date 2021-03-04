@@ -24,7 +24,7 @@ namespace embeddedpenguins::neuron::infrastructure
         unsigned long int RequiredPresynapticConnections { };
         NeuronType Type { NeuronType::Excitatory };
         int Activation { 0 };
-        unsigned long long int TickLastSpike { numeric_limits<unsigned long long int>::max() - 1000ULL };
+        unsigned long int TickLastSpike { numeric_limits<unsigned long long int>::max() - 1000ULL };
         bool InRefractoryDelay { false };
         bool InDecay { false };
     };

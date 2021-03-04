@@ -18,6 +18,7 @@
 #include "NeuronRecord.h"
 #include "CpuModelCarrier.h"
 #include "NeuronModelHelper.h"
+#include "CpuModelUi.h"
 #include "persistence/sonata/SonataModelRepository.h"
 #include "persistence/sonata/SonataModelPersister.h"
 #include "persistence/sonata/SonataInputSpikeLoader.h"
@@ -39,6 +40,7 @@ using embeddedpenguins::neuron::infrastructure::NeuronNode;
 using embeddedpenguins::neuron::infrastructure::NeuronRecord;
 using embeddedpenguins::neuron::infrastructure::CpuModelCarrier;
 using embeddedpenguins::neuron::infrastructure::NeuronModelHelper;
+using embeddedpenguins::neuron::infrastructure::CpuModelUi;
 
 using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelRepository;
 using embeddedpenguins::neuron::infrastructure::persistence::sonata::SonataModelPersister;
@@ -126,7 +128,10 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    PrintAndListenForQuit(modelRunner, carrier);
+    //PrintAndListenForQuit(modelRunner, carrier);
+    CpuModelUi ui(modelRunner, helper);
+    ui.ParseArguments(argc, argv);
+    ui.PrintAndListenForQuit();
 
     modelRunner.WaitForQuit();
     return 0;

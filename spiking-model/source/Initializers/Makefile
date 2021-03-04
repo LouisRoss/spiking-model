@@ -5,6 +5,7 @@ CC=g++
 CCFLAGS=-I$(IDIR) -I$(ILDIR) -I$(IH5DIR) -fpic -pthread -std=c++17
 LFLAGS=-fpic -pthread -std=c++17
 LOG=-DNOLOG
+DEBUGFLAG=
 
 ODIR=obj
 BDIR=../../bin
@@ -29,17 +30,21 @@ all: $(BDIR)/ModelAnticipateInitializer.so $(BDIR)/ModelLayerInitializer.so $(BD
 .PHONY: all
 
 $(BDIR)/ModelAnticipateInitializer.so: $(ODIR)/ModelAnticipateInitializer.o
-	$(CC) -shared -o $@ $^ $(LFLAGS) $(LIBS)
+	$(CC) -shared -o $@ $^ $(DEBUGFLAG) $(LFLAGS) $(LIBS)
 
 $(BDIR)/ModelLayerInitializer.so: $(ODIR)/ModelLayerInitializer.o
-	$(CC) -shared -o $@ $^ $(LFLAGS) $(LIBS)
+	$(CC) -shared -o $@ $^ $(DEBUGFLAG) $(LFLAGS) $(LIBS)
 
 $(BDIR)/ModelSonataInitializer.so: $(ODIR)/ModelSonataInitializer.o
-	$(CC) -shared -o $@ $^ $(LFLAGS) $(LIBS)
+	$(CC) -shared -o $@ $^ $(DEBUGFLAG) $(LFLAGS) $(LIBS)
 
 $(ODIR)/%.o: %.cpp $(DEPS) $(NEURONDEPS) $(INITIALIZERDEPS) $(SONATADEPS)
 	mkdir -p $(ODIR)
-	$(CC) -c -o $@ $< $(CCFLAGS) $(LOG)
+	$(CC) -c -o $@ $< $(DEBUGFLAG) $(CCFLAGS) $(LOG)
+
+debug:
+	make DEBUGFLAG="-g"
+.PHONY: debug
 
 log:
 	make LOG=""

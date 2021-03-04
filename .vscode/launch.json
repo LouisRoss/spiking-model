@@ -17,12 +17,12 @@
             "name": "g++-9 - Build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/../../bin/NeuronModel",
+            "program": "${workspaceFolder}/spiking-model/bin/${fileBasenameNoExtension}",
             "args": [
-                "bmtk1"
+                "l1"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/../../bin",
+            "cwd": "${workspaceFolder}/spiking-model/bin",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -33,7 +33,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "C/C++: g++-9 build active file",
+            "preLaunchTask": "C/C++: g++ build active file",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]

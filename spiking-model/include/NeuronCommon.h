@@ -30,3 +30,9 @@ namespace embeddedpenguins::neuron::infrastructure
         Refractory      // The NeuronNode indexed by a NeuronOperation.Index is in refractory period after spiking.
     };
 }
+
+namespace embeddedpenguins::core::neuron::model
+{
+    constexpr int SynapticConnectionsPerNode = embeddedpenguins::neuron::infrastructure::PostsynapticConnectionsPerNode;
+}
+

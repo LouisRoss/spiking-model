@@ -43,7 +43,7 @@ namespace embeddedpenguins::neuron::infrastructure
         }
 
         ModelCarrier& Model() { return carrier_; }
-        //ModelCarrier& Carrier() { return carrier_; }
+        ModelCarrier& Carrier() { return carrier_; }
         const json& Configuration() const { return configuration_.Configuration(); }
         const ConfigurationRepository& Repository() const { return configuration_; }
         const unsigned long int Width() const { return width_; }
@@ -123,6 +123,44 @@ namespace embeddedpenguins::neuron::infrastructure
         NeuronType GetNeuronType(const unsigned long long int source) const
         {
             return carrier_.Model[source].Type;
+        }
+
+        short GetNeuronActivation(const unsigned long int source) const
+        {
+            return carrier_.Model[source].Activation;
+        }
+
+        unsigned long int GetNeuronTicksSinceLastSpike(const unsigned long int source)
+        {
+            return carrier_.Model[source].TickLastSpike;
+        }
+
+        bool IsSynapseUsed(const unsigned long int neuronIndex, const unsigned int synapseId)
+        {
+            auto& neuron = carrier_.Model[neuronIndex];
+            return neuron.Synapses[synapseId].IsUsed;
+        }
+
+        int GetSynapticStrength(const unsigned long int neuronIndex, const unsigned int synapseId)
+        {
+            auto& neuron = carrier_.Model[neuronIndex];
+            return neuron.Synapses[synapseId].Strength;
+        }
+
+        unsigned long int GetPresynapticNeuron(const unsigned long int neuronIndex, const unsigned int synapseId)
+        {
+            auto it = std::find_if(carrier_.Model.begin(), carrier_.Model.end(),
+            [neuronIndex, synapseId](auto& n){
+                for (auto& synapse : n.PostsynapticConnections)
+                {
+                    if (synapse.PostsynapticNeuron == neuronIndex && synapse.Synapse == synapseId)
+                        return true;
+                }
+
+                return false;
+            });
+
+            return std::distance(it, carrier_.Model.begin());
         }
 
         void SetExcitatoryNeuronType(const unsigned long long int source)
