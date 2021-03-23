@@ -160,7 +160,7 @@ namespace embeddedpenguins::neuron::infrastructure
                 return false;
             });
 
-            return std::distance(it, carrier_.Model.begin());
+            return std::distance(carrier_.Model.begin(), it);
         }
 
         void SetExcitatoryNeuronType(const unsigned long long int source)
