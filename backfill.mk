@@ -129,7 +129,7 @@ $(COREDIR)/include/Recorder.h: include/Recorder.h
 
 # All files from the include/Initializers folder
 $(COREDIR)/include/Initializers/IModelInitializer.h: include/Initializers/IModelInitializer.h
-	cp s/Initializers/IModelInitializer.h $(COREDIR)/include/Initializers/
+	cp include/Initializers/IModelInitializer.h $(COREDIR)/include/Initializers/
 
 $(COREDIR)/include/Initializers/ModelAnticipateInitializer.h: include/Initializers/ModelAnticipateInitializer.h
 	cp include/Initializers/ModelAnticipateInitializer.h $(COREDIR)/include/Initializers/
